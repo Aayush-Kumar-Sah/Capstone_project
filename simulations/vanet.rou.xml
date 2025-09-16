@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+    <!-- Vehicle types -->
+    <vType id="car" accel="2.6" decel="4.5" sigma="0.5" length="5" minGap="2.5" maxSpeed="16.67" color="1,1,0"/>
+    <vType id="truck" accel="1.6" decel="3.5" sigma="0.5" length="12" minGap="3.5" maxSpeed="12.5" color="1,0,0"/>
+    
+    <!-- Routes -->
+    <route id="route0" edges="e1 e2 e3 e4"/>
+    <route id="route1" edges="e5 e6 e7 e8"/>
+    
+    <!-- Vehicles -->
+    <flow id="carflow0" type="car" route="route0" begin="0" end="1000" period="5" departSpeed="max"/>
+    <flow id="carflow1" type="car" route="route1" begin="0" end="1000" period="7" departSpeed="max"/>
+    <flow id="truckflow" type="truck" route="route0" begin="10" end="1000" period="15" departSpeed="max"/>
+</routes>
