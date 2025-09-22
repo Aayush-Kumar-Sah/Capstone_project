@@ -1,0 +1,173 @@
+VANET P2P Implementation Documentation
+=====================================
+
+Modules Developed (Post Phase-2)
+-------------------------------
+
+1. Vehicle Node Module (src/vehicle_node.py)
+------------------------------------------
+Functionality: Core implementation of individual vehicle nodes in the P2P network
+Implementation Details:
+- Class: VehicleNode
+  * Attributes:
+    - node_id: Unique identifier for each vehicle
+    - location: (latitude, longitude) tracking
+    - speed, direction: Movement parameters
+    - connections: List of peer connections
+    - trust_score: Node reliability metric
+  * Features:
+    - P2P communication methods using libp2p
+    - Status update mechanisms
+    - Location and speed tracking
+    - Connection management
+
+2. Clustering Algorithm (src/clustering.py)
+----------------------------------------
+Functionality: Manages dynamic cluster formation and node role assignment
+Implementation Details:
+- Class: ClusterManager
+  * Clustering Metrics:
+    - Relative mobility calculation
+    - Direction similarity metrics
+    - Signal strength assessment
+  * Node Weight Calculation:
+    - Connectivity degree (25%)
+    - Relative mobility (25%)
+    - Signal strength (20%)
+    - Battery level (15%)
+    - Historical stability (15%)
+  * Features:
+    - Dynamic cluster maintenance
+    - Boundary node detection
+    - Cluster head selection
+    - Member management
+
+3. Consensus Mechanism (src/consensus.py)
+---------------------------------------
+Functionality: Implements PoA consensus for relay node selection
+Implementation Details:
+- Class: ConsensusManager
+  * Components:
+    - Network graph management
+    - Node centrality calculations
+    - Authority score tracking
+    - Relay node selection algorithm
+  * Features:
+    - Performance-based authority updates
+    - Consensus validation
+    - Network state management
+
+4. Network Manager (src/network_manager.py)
+----------------------------------------
+Functionality: Handles network stability and fault tolerance
+Implementation Details:
+- Class: NetworkManager
+  * Core Functions:
+    - Active node tracking
+    - Relay node management
+    - Health monitoring
+    - Failure detection
+  * Features:
+    - Network statistics collection
+    - Performance monitoring
+    - State synchronization
+
+5. Simulation Integration (src/simulation_bridge.py, src/custom_vanet_appl.py)
+--------------------------------------------------------------------------
+Functionality: Integrates P2P VANET with OMNeT++/SUMO/Veins
+Implementation Details:
+- Components:
+  * SUMO-OMNeT++ synchronization
+  * Vehicle state updates
+  * Message handling
+  * Real-time visualization
+- Features:
+  * Traffic simulation integration
+  * Network simulation
+  * Visualization tools
+
+Pending Modules/Tasks
+--------------------
+
+1. Relay Node Selection Mechanism (In Progress)
+-------------------------------------------
+Required Implementation:
+- Degree distribution algorithm
+- PoA consensus integration
+- Dynamic role switching
+- Load balancing
+TODO:
+* Weight-based relay selection
+* Load distribution metrics
+* Role transition protocols
+* Performance monitoring
+
+2. Fault Tolerance Mechanisms (Pending)
+------------------------------------
+Required Implementation:
+- Comprehensive failure detection
+- Recovery procedures
+- Backup selection algorithms
+TODO:
+* Heartbeat monitoring
+* Failure detection thresholds
+* Recovery state machine
+* Backup node selection
+
+3. Message Routing Protocol (Enhancement Needed)
+-------------------------------------------
+Required Implementation:
+- Inter-cluster routing optimization
+- Message prioritization
+- QoS mechanisms
+TODO:
+* Priority queue implementation
+* Route optimization
+* Delivery guarantees
+* Congestion control
+
+4. Security Features (To Be Added)
+-------------------------------
+Required Implementation:
+- Authentication mechanisms
+- Message encryption
+- Trust management
+TODO:
+* PKI infrastructure
+* Secure message exchange
+* Trust score calculation
+* Malicious node detection
+
+5. Performance Metrics (To Be Implemented)
+--------------------------------------
+Required Implementation:
+- Network latency monitoring
+- Throughput measurements
+- Cluster stability metrics
+TODO:
+* Metric collection
+* Performance analysis
+* Visualization tools
+* Benchmark comparisons
+
+6. Testing and Validation (Enhancement Needed)
+-----------------------------------------
+Required Implementation:
+- Comprehensive unit tests
+- Integration tests
+- Performance benchmarks
+TODO:
+* Test suite development
+* Scenario-based testing
+* Load testing
+* Validation frameworks
+
+Next Steps
+----------
+1. Complete the relay node selection mechanism
+2. Implement basic fault tolerance features
+3. Enhance security measures
+4. Develop comprehensive testing framework
+5. Add performance monitoring and analysis tools
+
+Note: This documentation will be updated as new features are implemented and existing modules are enhanced.

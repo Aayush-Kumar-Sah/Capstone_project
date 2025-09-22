@@ -1,5 +1,0 @@
-Loading net-file from 'simulations/vanet.net.xml' ... done (25ms).
-Loading additional-files from 'simulations/vanet.add.xml' ...
-Error: No initial signal plan loaded for tls '0'.
-Loading of additional-files failed.
-Quitting (on error).

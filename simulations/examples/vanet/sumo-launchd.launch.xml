@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+    <copy file="vanet.net.xml" />
+    <copy file="vanet.rou.xml" />
+    <copy file="vanet.add.xml" />
+    <copy file="config.sumo.cfg" type="config" />
+    <seed value="0" />
+</launch>
