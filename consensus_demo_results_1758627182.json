@@ -1,0 +1,95 @@
+{
+  "demo_config": {
+    "duration": 30.0,
+    "num_vehicles": 20,
+    "num_authorities": 3,
+    "malicious_probability": 0.1
+  },
+  "final_statistics": {
+    "application": {
+      "total_vehicles": 23,
+      "simulation_time": 30.000000000000156,
+      "simulation_steps": 300,
+      "messages_sent": 755,
+      "messages_received": 0,
+      "clusters_formed": 0,
+      "cluster_joins": 42,
+      "cluster_leaves": 18,
+      "head_elections": 16,
+      "trust_evaluations": 92,
+      "malicious_nodes_detected": 0,
+      "consensus_messages": 0,
+      "trust_updates": 2
+    },
+    "clustering": {
+      "total_clusters": 5,
+      "total_clustered_vehicles": 23,
+      "avg_cluster_size": 4.6,
+      "largest_cluster_size": 10,
+      "smallest_cluster_size": 2
+    },
+    "cluster_management": {
+      "total_managed_clusters": 5,
+      "average_cluster_quality": 0.5187349139938175,
+      "average_cluster_lifetime": 19.180000000000096,
+      "state_distribution": {
+        "forming": 4,
+        "stable": 1
+      },
+      "total_events": 21,
+      "recent_events": 0,
+      "event_type_distribution": {},
+      "head_election_method": "weighted_composite"
+    },
+    "message_processing": {
+      "total_messages_processed": 0,
+      "active_vehicles": 0,
+      "message_type_distribution": {},
+      "pending_responses": 0
+    },
+    "trust_and_security": {
+      "trust_enabled": true,
+      "total_nodes": 23,
+      "trusted_nodes": 20,
+      "malicious_nodes": 0,
+      "average_trust_score": 0.8391304347826088,
+      "trust_evaluations": 92,
+      "malicious_detections": 0,
+      "trust_updates": 2,
+      "consensus_messages": 0,
+      "authority_nodes": 3,
+      "consensus_stats": {
+        "node_id": "demo_authority_001",
+        "consensus_type": "hybrid",
+        "is_leader": false,
+        "current_leader": "authority_001",
+        "trust_evaluations": 23,
+        "malicious_reports": 0,
+        "raft": {
+          "state": "follower",
+          "current_term": 0,
+          "log_length": 0,
+          "cluster_size": 1
+        },
+        "poa": {
+          "authorities": 3,
+          "authority_scores": {
+            "authority_001": 0.8,
+            "authority_002": 0.8,
+            "authority_000": 0.8
+          },
+          "current_leader": "authority_001"
+        }
+      }
+    },
+    "configuration": {
+      "enable_clustering": true,
+      "enable_emergency_handling": true,
+      "max_message_buffer_size": 100,
+      "neighbor_timeout": 10.0,
+      "cluster_announcement_interval": 3.0,
+      "heartbeat_interval": 2.0
+    }
+  },
+  "timestamp": 1758627182.2243924
+}

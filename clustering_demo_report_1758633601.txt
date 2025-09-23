@@ -1,0 +1,30 @@
+
+VANET Clustering Demonstration Summary Report
+============================================
+
+Simulation Configuration:
+- Algorithm: mobility_based
+- Duration: 30.0 seconds
+- Total Steps: 300
+
+Vehicle Statistics:
+- Total Vehicles: 45
+- Messages Sent: 1991
+- Messages Received: 0
+
+Clustering Performance:
+- Total Clusters Formed: 14
+- Currently Clustered Vehicles: 141
+- Average Cluster Size: 10.07
+- Largest Cluster Size: 16
+
+Cluster Management Events:
+- Cluster Joins: 374
+- Cluster Leaves: 305
+- Head Elections: 11
+
+Final State:
+- Active Clusters: 14
+- Clustering Efficiency: 313.3%
+
+Report generated at: 2025-09-23 13:20:01

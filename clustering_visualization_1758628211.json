@@ -1,0 +1,237 @@
+{
+  "timestamp": 1758628211.626527,
+  "cluster_colors": {
+    "cluster_6": [
+      229,
+      45,
+      45
+    ],
+    "cluster_5": [
+      229,
+      203,
+      45
+    ],
+    "cluster_2": [
+      98,
+      229,
+      45
+    ],
+    "cluster_0": [
+      45,
+      229,
+      150
+    ],
+    "cluster_1": [
+      45,
+      150,
+      229
+    ],
+    "cluster_3": [
+      98,
+      45,
+      229
+    ],
+    "cluster_4": [
+      229,
+      45,
+      203
+    ],
+    "cluster_7": [
+      229,
+      45,
+      45
+    ],
+    "cluster_8": [
+      45,
+      229,
+      229
+    ],
+    "cluster_9": [
+      229,
+      45,
+      45
+    ],
+    "cluster_11": [
+      229,
+      45,
+      45
+    ],
+    "cluster_10": [
+      45,
+      229,
+      229
+    ]
+  },
+  "active_lines": [],
+  "active_polygons": [],
+  "statistics": {
+    "updates_performed": 300,
+    "elements_created": 0,
+    "elements_removed": 0,
+    "last_update_time": 5.9604644775390625e-06
+  },
+  "config": {
+    "show_cluster_colors": true,
+    "show_head_highlighting": true,
+    "show_membership_lines": true,
+    "show_cluster_boundaries": true
+  },
+  "clusters": {
+    "cluster_0": {
+      "head_id": "vehicle_002",
+      "member_count": 4,
+      "centroid": [
+        687.8417671315485,
+        198.74094969415134
+      ],
+      "color": [
+        45,
+        229,
+        150
+      ]
+    },
+    "cluster_1": {
+      "head_id": "vehicle_003",
+      "member_count": 15,
+      "centroid": [
+        272.79741286542514,
+        3.680134635241626
+      ],
+      "color": [
+        45,
+        150,
+        229
+      ]
+    },
+    "cluster_2": {
+      "head_id": "vehicle_027",
+      "member_count": 11,
+      "centroid": [
+        495.9131468004805,
+        0.7620628906637288
+      ],
+      "color": [
+        98,
+        229,
+        45
+      ]
+    },
+    "cluster_3": {
+      "head_id": "vehicle_013",
+      "member_count": 4,
+      "centroid": [
+        874.7250394316434,
+        198.4249134923648
+      ],
+      "color": [
+        98,
+        45,
+        229
+      ]
+    },
+    "cluster_4": {
+      "head_id": "vehicle_036",
+      "member_count": 9,
+      "centroid": [
+        96.716101816529,
+        5.794187207727662
+      ],
+      "color": [
+        229,
+        45,
+        203
+      ]
+    },
+    "cluster_5": {
+      "head_id": "vehicle_039",
+      "member_count": 2,
+      "centroid": [
+        412.36787855977605,
+        113.5263264247186
+      ],
+      "color": [
+        229,
+        203,
+        45
+      ]
+    },
+    "cluster_6": {
+      "head_id": "vehicle_044",
+      "member_count": 6,
+      "centroid": [
+        524.764795540423,
+        164.4838692834131
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    },
+    "cluster_7": {
+      "head_id": "vehicle_015",
+      "member_count": 5,
+      "centroid": [
+        933.2147115808389,
+        0.9606903634079351
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    },
+    "cluster_8": {
+      "head_id": "vehicle_003",
+      "member_count": 12,
+      "centroid": [
+        742.72887427759,
+        1.3939778092019033
+      ],
+      "color": [
+        45,
+        229,
+        229
+      ]
+    },
+    "cluster_9": {
+      "head_id": "vehicle_022",
+      "member_count": 10,
+      "centroid": [
+        652.5381534901423,
+        1.45923818189284
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    },
+    "cluster_10": {
+      "head_id": "vehicle_009",
+      "member_count": 16,
+      "centroid": [
+        728.0190270347582,
+        2.9888438475785373
+      ],
+      "color": [
+        45,
+        229,
+        229
+      ]
+    },
+    "cluster_11": {
+      "head_id": "vehicle_029",
+      "member_count": 3,
+      "centroid": [
+        284.17341797576773,
+        5.560567301517281
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    }
+  }
+}

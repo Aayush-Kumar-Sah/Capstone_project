@@ -1,0 +1,237 @@
+{
+  "timestamp": 1758648763.9741876,
+  "cluster_colors": {
+    "cluster_2": [
+      229,
+      45,
+      45
+    ],
+    "cluster_5": [
+      229,
+      229,
+      45
+    ],
+    "cluster_3": [
+      45,
+      229,
+      45
+    ],
+    "cluster_1": [
+      45,
+      229,
+      229
+    ],
+    "cluster_0": [
+      45,
+      45,
+      229
+    ],
+    "cluster_4": [
+      229,
+      45,
+      229
+    ],
+    "cluster_7": [
+      229,
+      45,
+      45
+    ],
+    "cluster_6": [
+      45,
+      229,
+      229
+    ],
+    "cluster_9": [
+      229,
+      45,
+      45
+    ],
+    "cluster_8": [
+      45,
+      229,
+      229
+    ],
+    "cluster_11": [
+      229,
+      45,
+      45
+    ],
+    "cluster_10": [
+      45,
+      229,
+      229
+    ]
+  },
+  "active_lines": [],
+  "active_polygons": [],
+  "statistics": {
+    "updates_performed": 300,
+    "elements_created": 0,
+    "elements_removed": 0,
+    "last_update_time": 3.337860107421875e-06
+  },
+  "config": {
+    "show_cluster_colors": true,
+    "show_head_highlighting": true,
+    "show_membership_lines": true,
+    "show_cluster_boundaries": true
+  },
+  "clusters": {
+    "cluster_0": {
+      "head_id": "vehicle_003",
+      "member_count": 11,
+      "centroid": [
+        270.06797569858156,
+        3.303337274319661
+      ],
+      "color": [
+        45,
+        45,
+        229
+      ]
+    },
+    "cluster_1": {
+      "head_id": "vehicle_006",
+      "member_count": 6,
+      "centroid": [
+        757.0368552254048,
+        199.16662651991385
+      ],
+      "color": [
+        45,
+        229,
+        229
+      ]
+    },
+    "cluster_2": {
+      "head_id": "vehicle_022",
+      "member_count": 10,
+      "centroid": [
+        354.0859532223856,
+        1.973619185053613
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    },
+    "cluster_3": {
+      "head_id": "vehicle_036",
+      "member_count": 9,
+      "centroid": [
+        84.25533010264267,
+        5.5652417883196765
+      ],
+      "color": [
+        45,
+        229,
+        45
+      ]
+    },
+    "cluster_4": {
+      "head_id": "vehicle_039",
+      "member_count": 2,
+      "centroid": [
+        414.5624360697139,
+        66.30101113976826
+      ],
+      "color": [
+        229,
+        45,
+        229
+      ]
+    },
+    "cluster_5": {
+      "head_id": "vehicle_044",
+      "member_count": 6,
+      "centroid": [
+        520.8815951487265,
+        114.71247885316191
+      ],
+      "color": [
+        229,
+        229,
+        45
+      ]
+    },
+    "cluster_6": {
+      "head_id": "vehicle_011",
+      "member_count": 12,
+      "centroid": [
+        501.08114718873463,
+        1.647984603383473
+      ],
+      "color": [
+        45,
+        229,
+        229
+      ]
+    },
+    "cluster_7": {
+      "head_id": "vehicle_023",
+      "member_count": 16,
+      "centroid": [
+        389.29773712399606,
+        2.632792508714232
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    },
+    "cluster_8": {
+      "head_id": "vehicle_011",
+      "member_count": 12,
+      "centroid": [
+        747.0307329134578,
+        1.9458120804598487
+      ],
+      "color": [
+        45,
+        229,
+        229
+      ]
+    },
+    "cluster_9": {
+      "head_id": "vehicle_001",
+      "member_count": 14,
+      "centroid": [
+        751.0638527200626,
+        4.1167239708275964
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    },
+    "cluster_10": {
+      "head_id": "vehicle_013",
+      "member_count": 6,
+      "centroid": [
+        925.9476055903125,
+        1.8399582700614574
+      ],
+      "color": [
+        45,
+        229,
+        229
+      ]
+    },
+    "cluster_11": {
+      "head_id": "vehicle_031",
+      "member_count": 5,
+      "centroid": [
+        256.00479594192245,
+        5.504062172045259
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    }
+  }
+}

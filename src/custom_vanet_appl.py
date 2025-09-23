@@ -19,6 +19,10 @@ from .message_processor import (
     MessageProcessor, VANETMessage, MessageType, 
     JoinResponseCode, MergeResponseCode
 )
+from .consensus_engine import (
+    ConsensusEngine, TrustMetrics, TrustLevel, MaliciousActivity,
+    ConsensusMessage, ConsensusMessageType
+)
 
 class MessageType(Enum):
     """Message types for backward compatibility with tests"""
@@ -48,6 +52,16 @@ class VehicleNode:
     
     # Clustering properties
     cluster_id: str = ""
+    
+    # Trust and Security properties
+    trust_score: float = 1.0
+    trust_level: TrustLevel = TrustLevel.UNKNOWN
+    is_malicious: bool = False
+    message_authenticity_score: float = 1.0
+    behavior_consistency_score: float = 1.0
+    location_verification_score: float = 1.0
+    last_trust_update: float = 0.0
+    malicious_activity_count: int = 0
     is_cluster_head: bool = False
     cluster_join_attempts: int = 0
     last_cluster_update: float = 0.0
@@ -91,6 +105,19 @@ class CustomVANETApplication:
         self.cluster_manager = ClusterManager(self.clustering_engine)
         self.message_processor = MessageProcessor()
         
+        # Consensus and Security components
+        self.consensus_engine: Optional[ConsensusEngine] = None
+        self.trust_enabled = True
+        self.consensus_type = "hybrid"  # "raft", "poa", or "hybrid"
+        self.authority_nodes: Set[str] = set()
+        self.trust_update_interval = 10.0  # seconds
+        self.last_trust_update = 0.0
+        
+        # Security thresholds
+        self.trusted_threshold = 0.7
+        self.malicious_threshold = 0.3
+        self.trust_decay_rate = 0.05  # Trust decay per hour without interaction
+        
         # Application state
         self.current_time = 0.0
         self.simulation_step = 0
@@ -103,7 +130,11 @@ class CustomVANETApplication:
             'clusters_formed': 0,
             'cluster_joins': 0,
             'cluster_leaves': 0,
-            'head_elections': 0
+            'head_elections': 0,
+            'trust_evaluations': 0,
+            'malicious_nodes_detected': 0,
+            'consensus_messages': 0,
+            'trust_updates': 0
         }
         
         # Configuration
@@ -127,6 +158,45 @@ class CustomVANETApplication:
         self.is_initialized = True
         self.logger.info("VANET application initialized")
     
+    def initialize_consensus(self, node_id: str, consensus_type: str = "hybrid", 
+                           authority_nodes: List[str] = None):
+        """Initialize consensus engine for trust evaluation"""
+        self.consensus_type = consensus_type
+        self.consensus_engine = ConsensusEngine(node_id, consensus_type)
+        
+        if authority_nodes:
+            self.authority_nodes = set(authority_nodes)
+            
+        # Initialize consensus algorithms based on type
+        if consensus_type in ["raft", "hybrid"]:
+            # Initialize Raft with all known nodes (will be updated as nodes join)
+            cluster_nodes = list(self.vehicle_nodes.keys()) if self.vehicle_nodes else [node_id]
+            self.consensus_engine.initialize_raft(cluster_nodes)
+            
+        if consensus_type in ["poa", "hybrid"]:
+            # Initialize PoA with authority nodes
+            authorities = list(self.authority_nodes) if self.authority_nodes else [node_id]
+            self.consensus_engine.initialize_poa(authorities)
+        
+        self.consensus_engine.start()
+        self.logger.info(f"Consensus engine initialized: {consensus_type} with {len(self.authority_nodes)} authorities")
+    
+    def add_authority_node(self, node_id: str):
+        """Add a node as a trusted authority"""
+        self.authority_nodes.add(node_id)
+        if self.consensus_engine and self.consensus_engine.poa:
+            self.consensus_engine.poa.authorities.add(node_id)
+            self.consensus_engine.poa.authority_scores[node_id] = 0.8  # Initial high score
+        self.logger.info(f"Added authority node: {node_id}")
+    
+    def remove_authority_node(self, node_id: str):
+        """Remove authority status from a node"""
+        self.authority_nodes.discard(node_id)
+        if self.consensus_engine and self.consensus_engine.poa:
+            self.consensus_engine.poa.authorities.discard(node_id)
+            self.consensus_engine.poa.authority_scores.pop(node_id, None)
+        self.logger.info(f"Removed authority node: {node_id}")
+    
     def handle_timeStep(self, simulation_time: float):
         """Handle simulation time step"""
         self.current_time = simulation_time
@@ -149,6 +219,10 @@ class CustomVANETApplication:
         if self._should_update_clusters():
             self._update_clustering()
             self.last_cluster_update = self.current_time
+        
+        # Update trust evaluations
+        if self.trust_enabled and self._should_update_trust():
+            self.update_trust_scores()
         
         # Clean up old data
         self._cleanup_old_data()
@@ -200,6 +274,109 @@ class CustomVANETApplication:
             
             del self.vehicle_nodes[vehicle_id]
             self.logger.info(f"Removed vehicle {vehicle_id}")
+    
+    def evaluate_node_trust(self, node_id: str, behavior_data: Dict[str, Any] = None) -> float:
+        """Evaluate trust score for a node"""
+        if not self.trust_enabled or not self.consensus_engine:
+            return 1.0
+        
+        if node_id not in self.vehicle_nodes:
+            return 0.0
+            
+        node = self.vehicle_nodes[node_id]
+        current_time = time.time()
+        
+        # Create trust metrics from available data
+        trust_metrics = TrustMetrics(
+            node_id=node_id,
+            message_authenticity=node.message_authenticity_score,
+            behavior_consistency=node.behavior_consistency_score,
+            network_participation=self._calculate_network_participation(node_id),
+            response_reliability=self._calculate_response_reliability(node_id),
+            location_verification=node.location_verification_score,
+            timestamp=current_time
+        )
+        
+        # Evaluate trust using consensus engine
+        trust_score = self.consensus_engine.evaluate_node_trust(node_id, trust_metrics)
+        
+        # Update node trust information
+        node.trust_score = trust_score
+        node.trust_level = self.consensus_engine.get_trust_level(node_id)
+        node.last_trust_update = current_time
+        
+        # Check for malicious behavior if behavior data provided
+        if behavior_data:
+            malicious_activity = self.consensus_engine.trust_engine.detect_malicious_behavior(
+                node_id, behavior_data
+            )
+            if malicious_activity:
+                node.is_malicious = True
+                node.malicious_activity_count += 1
+                self._handle_malicious_node_detected(node_id, malicious_activity)
+        
+        self.statistics['trust_evaluations'] += 1
+        return trust_score
+    
+    def report_malicious_activity(self, reporter_id: str, target_id: str, 
+                                 activity_type: str, evidence: Dict[str, Any], 
+                                 severity: float) -> bool:
+        """Report malicious activity to the consensus network"""
+        if not self.consensus_engine or reporter_id not in self.vehicle_nodes:
+            return False
+        
+        # Create malicious activity report
+        report_message = self.consensus_engine.report_malicious_activity(
+            target_id, activity_type, evidence, severity
+        )
+        
+        # Broadcast to authorities
+        self._broadcast_consensus_message(report_message)
+        
+        self.logger.warning(f"Malicious activity reported: {target_id} by {reporter_id}")
+        return True
+    
+    def update_trust_scores(self):
+        """Update trust scores for all nodes"""
+        if not self.trust_enabled or not self.consensus_engine:
+            return
+        
+        current_time = self.current_time
+        
+        for node_id, node in self.vehicle_nodes.items():
+            # Skip recent updates
+            if current_time - node.last_trust_update < self.trust_update_interval:
+                continue
+            
+            # Collect behavior data
+            behavior_data = self._collect_behavior_data(node_id)
+            
+            # Evaluate trust
+            self.evaluate_node_trust(node_id, behavior_data)
+            
+            # Apply trust decay for inactive nodes
+            if current_time - node.last_update > 3600:  # 1 hour
+                node.trust_score *= (1 - self.trust_decay_rate)
+                node.trust_score = max(0.0, node.trust_score)
+        
+        self.last_trust_update = current_time
+        self.statistics['trust_updates'] += 1
+    
+    def is_node_trusted(self, node_id: str) -> bool:
+        """Check if a node is trusted"""
+        if not self.trust_enabled or node_id not in self.vehicle_nodes:
+            return True  # Default to trusted if no trust system
+        
+        node = self.vehicle_nodes[node_id]
+        return node.trust_score >= self.trusted_threshold and not node.is_malicious
+    
+    def is_node_malicious(self, node_id: str) -> bool:
+        """Check if a node is considered malicious"""
+        if not self.trust_enabled or node_id not in self.vehicle_nodes:
+            return False
+        
+        node = self.vehicle_nodes[node_id]
+        return node.is_malicious or node.trust_score <= self.malicious_threshold
     
     def receive_message(self, message_data: Dict[str, Any]):
         """Receive and process incoming message"""
@@ -279,6 +456,10 @@ class CustomVANETApplication:
         should_update = (self.current_time - self.last_cluster_update) >= self.cluster_update_interval
         self.logger.debug(f"Should update clusters? current_time={self.current_time}, last_update={self.last_cluster_update}, interval={self.cluster_update_interval}, result={should_update}")
         return should_update
+    
+    def _should_update_trust(self) -> bool:
+        """Check if it's time to update trust scores"""
+        return (self.current_time - self.last_trust_update) >= self.trust_update_interval
     
     def _send_beacons(self):
         """Send beacon messages from all vehicles"""
@@ -826,6 +1007,7 @@ class CustomVANETApplication:
         cluster_stats = self.cluster_manager.get_cluster_management_statistics()
         message_stats = self.message_processor.get_message_statistics()
         clustering_stats = self.clustering_engine.get_cluster_statistics()
+        trust_stats = self.get_trust_statistics()
         
         return {
             'application': {
@@ -837,11 +1019,16 @@ class CustomVANETApplication:
                 'clusters_formed': self.statistics['clusters_formed'],
                 'cluster_joins': self.statistics['cluster_joins'],
                 'cluster_leaves': self.statistics['cluster_leaves'],
-                'head_elections': self.statistics['head_elections']
+                'head_elections': self.statistics['head_elections'],
+                'trust_evaluations': self.statistics['trust_evaluations'],
+                'malicious_nodes_detected': self.statistics['malicious_nodes_detected'],
+                'consensus_messages': self.statistics['consensus_messages'],
+                'trust_updates': self.statistics['trust_updates']
             },
             'clustering': clustering_stats,
             'cluster_management': cluster_stats,
             'message_processing': message_stats,
+            'trust_and_security': trust_stats,
             'configuration': self.config
         }
     
@@ -871,4 +1058,193 @@ class CustomVANETApplication:
             'member_count': cluster.size(),
             'members': list(cluster.member_ids),
             'cluster_state': self.cluster_manager.cluster_states.get(cluster.id, ClusterState.FORMING).value
+        }
+    
+    # Trust and Security Helper Methods
+    
+    def _calculate_network_participation(self, node_id: str) -> float:
+        """Calculate network participation score for a node"""
+        if node_id not in self.vehicle_nodes:
+            return 0.0
+        
+        node = self.vehicle_nodes[node_id]
+        
+        # Base participation on message activity and cluster involvement
+        message_activity = min(len(node.message_buffer) / 50.0, 1.0)  # Normalize to 0-1
+        cluster_participation = 1.0 if node.cluster_id else 0.5
+        neighbor_interaction = min(len(node.neighbors) / 10.0, 1.0)
+        
+        return (message_activity + cluster_participation + neighbor_interaction) / 3.0
+    
+    def _calculate_response_reliability(self, node_id: str) -> float:
+        """Calculate response reliability score for a node"""
+        if node_id not in self.vehicle_nodes:
+            return 0.0
+        
+        # In a real implementation, this would track message response rates
+        # For simulation, we'll use a baseline score with some variance
+        node = self.vehicle_nodes[node_id]
+        
+        # Factor in how long the node has been active
+        activity_duration = self.current_time - (node.last_update - 3600)  # Assume 1 hour max
+        reliability_base = min(activity_duration / 3600.0, 1.0)
+        
+        # Factor in malicious activity count
+        malicious_penalty = min(node.malicious_activity_count * 0.1, 0.5)
+        
+        return max(0.0, reliability_base - malicious_penalty)
+    
+    def _collect_behavior_data(self, node_id: str) -> Dict[str, Any]:
+        """Collect behavior data for trust evaluation"""
+        if node_id not in self.vehicle_nodes:
+            return {}
+        
+        node = self.vehicle_nodes[node_id]
+        current_time = time.time()
+        
+        # Simulate behavior data collection
+        behavior_data = {
+            'location': node.location,
+            'previous_location': node.location,  # Would be tracked in real system
+            'time_diff': 1.0,  # Simulated time difference
+            'max_reasonable_speed': 200,  # km/h
+            'message_integrity': node.message_authenticity_score,
+            'response_times': [0.1, 0.15, 0.08, 0.12, 0.09],  # Simulated response times
+            'activity_timestamp': current_time
+        }
+        
+        return behavior_data
+    
+    def _handle_malicious_node_detected(self, node_id: str, malicious_activity: MaliciousActivity):
+        """Handle detection of malicious node"""
+        self.logger.warning(f"Malicious node detected: {node_id} - {malicious_activity.activity_type}")
+        
+        # Update statistics
+        self.statistics['malicious_nodes_detected'] += 1
+        
+        # Mark node as malicious
+        if node_id in self.vehicle_nodes:
+            node = self.vehicle_nodes[node_id]
+            node.is_malicious = True
+            node.trust_score = min(node.trust_score, 0.2)  # Significantly reduce trust
+        
+        # If node is cluster head, trigger head change
+        if node_id in self.vehicle_nodes and self.vehicle_nodes[node_id].is_cluster_head:
+            self._handle_malicious_cluster_head(node_id)
+        
+        # Broadcast warning to other nodes
+        self._broadcast_malicious_node_warning(node_id, malicious_activity)
+    
+    def _handle_malicious_cluster_head(self, head_id: str):
+        """Handle malicious cluster head detection"""
+        self.logger.warning(f"Malicious cluster head detected: {head_id}")
+        
+        # Force immediate head election in the cluster
+        if head_id in self.vehicle_nodes:
+            cluster_id = self.vehicle_nodes[head_id].cluster_id
+            if cluster_id and cluster_id in self.clustering_engine.clusters:
+                cluster = self.clustering_engine.clusters[cluster_id]
+                
+                # Remove malicious head
+                cluster.member_ids.discard(head_id)
+                if head_id == cluster.head_id:
+                    # Trigger emergency head election
+                    self._emergency_head_election(cluster)
+    
+    def _emergency_head_election(self, cluster: Cluster):
+        """Perform emergency head election due to malicious head"""
+        self.logger.info(f"Emergency head election for cluster {cluster.id}")
+        
+        if not cluster.member_ids:
+            # No members left, dissolve cluster
+            del self.clustering_engine.clusters[cluster.id]
+            return
+        
+        # Select new head based on highest trust score
+        best_candidate = None
+        best_trust_score = 0.0
+        
+        for member_id in cluster.member_ids:
+            if member_id in self.vehicle_nodes and not self.vehicle_nodes[member_id].is_malicious:
+                trust_score = self.vehicle_nodes[member_id].trust_score
+                if trust_score > best_trust_score:
+                    best_trust_score = trust_score
+                    best_candidate = member_id
+        
+        if best_candidate:
+            # Update cluster head
+            old_head = cluster.head_id
+            cluster.head_id = best_candidate
+            
+            # Update node properties
+            if old_head in self.vehicle_nodes:
+                self.vehicle_nodes[old_head].is_cluster_head = False
+            
+            self.vehicle_nodes[best_candidate].is_cluster_head = True
+            
+            self.logger.info(f"New cluster head elected: {best_candidate} for cluster {cluster.id}")
+            self.statistics['head_elections'] += 1
+    
+    def _broadcast_malicious_node_warning(self, node_id: str, malicious_activity: MaliciousActivity):
+        """Broadcast warning about malicious node"""
+        if not self.consensus_engine:
+            return
+        
+        warning_message = ConsensusMessage(
+            msg_type=ConsensusMessageType.MALICIOUS_NODE_REPORT,
+            sender_id=self.consensus_engine.node_id if hasattr(self.consensus_engine, 'node_id') else "system",
+            receiver_id="broadcast",
+            term=0,
+            data={
+                'target_node': node_id,
+                'activity_type': malicious_activity.activity_type,
+                'severity': malicious_activity.severity,
+                'evidence': malicious_activity.evidence,
+                'timestamp': malicious_activity.timestamp
+            }
+        )
+        
+        self._broadcast_consensus_message(warning_message)
+    
+    def _broadcast_consensus_message(self, message: ConsensusMessage):
+        """Broadcast consensus message to all nodes"""
+        if not self.consensus_engine:
+            return
+        
+        # In a real system, this would send to all reachable nodes
+        # For simulation, we process locally and track the activity
+        self.statistics['consensus_messages'] += 1
+        
+        # Process the message if we're an authority node
+        response = self.consensus_engine.process_message(message)
+        if response:
+            self.logger.debug(f"Generated consensus response: {response.msg_type}")
+    
+    def get_trust_statistics(self) -> Dict[str, Any]:
+        """Get trust and security statistics"""
+        if not self.trust_enabled or not self.consensus_engine:
+            return {'trust_enabled': False}
+        
+        trusted_nodes = sum(1 for node in self.vehicle_nodes.values() 
+                          if node.trust_score >= self.trusted_threshold)
+        malicious_nodes = sum(1 for node in self.vehicle_nodes.values() 
+                            if node.is_malicious)
+        
+        trust_scores = [node.trust_score for node in self.vehicle_nodes.values()]
+        avg_trust = sum(trust_scores) / len(trust_scores) if trust_scores else 0.0
+        
+        consensus_stats = self.consensus_engine.get_consensus_statistics()
+        
+        return {
+            'trust_enabled': True,
+            'total_nodes': len(self.vehicle_nodes),
+            'trusted_nodes': trusted_nodes,
+            'malicious_nodes': malicious_nodes,
+            'average_trust_score': avg_trust,
+            'trust_evaluations': self.statistics['trust_evaluations'],
+            'malicious_detections': self.statistics['malicious_nodes_detected'],
+            'trust_updates': self.statistics['trust_updates'],
+            'consensus_messages': self.statistics['consensus_messages'],
+            'authority_nodes': len(self.authority_nodes),
+            'consensus_stats': consensus_stats
         }
