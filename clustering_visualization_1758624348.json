@@ -1,0 +1,219 @@
+{
+  "timestamp": 1758624348.462,
+  "cluster_colors": {
+    "cluster_3": [
+      229,
+      45,
+      45
+    ],
+    "cluster_4": [
+      229,
+      203,
+      45
+    ],
+    "cluster_6": [
+      98,
+      229,
+      45
+    ],
+    "cluster_5": [
+      45,
+      229,
+      150
+    ],
+    "cluster_2": [
+      45,
+      150,
+      229
+    ],
+    "cluster_0": [
+      98,
+      45,
+      229
+    ],
+    "cluster_1": [
+      229,
+      45,
+      203
+    ],
+    "cluster_7": [
+      229,
+      45,
+      45
+    ],
+    "cluster_8": [
+      45,
+      229,
+      229
+    ],
+    "cluster_9": [
+      229,
+      45,
+      45
+    ],
+    "cluster_10": [
+      229,
+      45,
+      45
+    ]
+  },
+  "active_lines": [],
+  "active_polygons": [],
+  "statistics": {
+    "updates_performed": 300,
+    "elements_created": 0,
+    "elements_removed": 0,
+    "last_update_time": 2.6226043701171875e-06
+  },
+  "config": {
+    "show_cluster_colors": true,
+    "show_head_highlighting": true,
+    "show_membership_lines": true,
+    "show_cluster_boundaries": true
+  },
+  "clusters": {
+    "cluster_0": {
+      "head_id": "vehicle_022",
+      "member_count": 7,
+      "centroid": [
+        609.7844870668815,
+        3.4207640105980537
+      ],
+      "color": [
+        98,
+        45,
+        229
+      ]
+    },
+    "cluster_1": {
+      "head_id": "vehicle_011",
+      "member_count": 6,
+      "centroid": [
+        862.2550584040293,
+        198.87400570395772
+      ],
+      "color": [
+        229,
+        45,
+        203
+      ]
+    },
+    "cluster_2": {
+      "head_id": "vehicle_010",
+      "member_count": 11,
+      "centroid": [
+        518.3308761092045,
+        3.1718292057116826
+      ],
+      "color": [
+        45,
+        150,
+        229
+      ]
+    },
+    "cluster_3": {
+      "head_id": "vehicle_020",
+      "member_count": 10,
+      "centroid": [
+        564.2156883481155,
+        3.325956162624891
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    },
+    "cluster_4": {
+      "head_id": "vehicle_036",
+      "member_count": 9,
+      "centroid": [
+        80.98517793476782,
+        6.190411528871927
+      ],
+      "color": [
+        229,
+        203,
+        45
+      ]
+    },
+    "cluster_5": {
+      "head_id": "vehicle_039",
+      "member_count": 2,
+      "centroid": [
+        412.77756926489405,
+        70.88624602593856
+      ],
+      "color": [
+        45,
+        229,
+        150
+      ]
+    },
+    "cluster_6": {
+      "head_id": "vehicle_045",
+      "member_count": 6,
+      "centroid": [
+        521.4212363207162,
+        146.4678566895711
+      ],
+      "color": [
+        98,
+        229,
+        45
+      ]
+    },
+    "cluster_7": {
+      "head_id": "vehicle_027",
+      "member_count": 6,
+      "centroid": [
+        709.0630740718132,
+        199.49306248569877
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    },
+    "cluster_8": {
+      "head_id": "vehicle_025",
+      "member_count": 5,
+      "centroid": [
+        712.6518438836599,
+        2.9859274760087713
+      ],
+      "color": [
+        45,
+        229,
+        229
+      ]
+    },
+    "cluster_9": {
+      "head_id": "vehicle_013",
+      "member_count": 7,
+      "centroid": [
+        913.9480345257246,
+        2.316068474497186
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    },
+    "cluster_10": {
+      "head_id": "vehicle_031",
+      "member_count": 5,
+      "centroid": [
+        260.3372977789928,
+        6.428062276262041
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    }
+  }
+}

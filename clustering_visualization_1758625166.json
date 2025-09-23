@@ -1,0 +1,183 @@
+{
+  "timestamp": 1758625166.7505443,
+  "cluster_colors": {
+    "cluster_7": [
+      229,
+      45,
+      45
+    ],
+    "cluster_6": [
+      229,
+      168,
+      45
+    ],
+    "cluster_3": [
+      168,
+      229,
+      45
+    ],
+    "cluster_4": [
+      45,
+      229,
+      45
+    ],
+    "cluster_5": [
+      45,
+      229,
+      168
+    ],
+    "cluster_8": [
+      45,
+      168,
+      229
+    ],
+    "cluster_0": [
+      45,
+      45,
+      229
+    ],
+    "cluster_2": [
+      168,
+      45,
+      229
+    ],
+    "cluster_1": [
+      229,
+      45,
+      168
+    ]
+  },
+  "active_lines": [],
+  "active_polygons": [],
+  "statistics": {
+    "updates_performed": 81,
+    "elements_created": 0,
+    "elements_removed": 0,
+    "last_update_time": 3.0994415283203125e-06
+  },
+  "config": {
+    "show_cluster_colors": true,
+    "show_head_highlighting": true,
+    "show_membership_lines": true,
+    "show_cluster_boundaries": true
+  },
+  "clusters": {
+    "cluster_0": {
+      "head_id": "vehicle_004",
+      "member_count": 12,
+      "centroid": [
+        169.3758854845019,
+        1.2765198865532983
+      ],
+      "color": [
+        45,
+        45,
+        229
+      ]
+    },
+    "cluster_1": {
+      "head_id": "vehicle_006",
+      "member_count": 2,
+      "centroid": [
+        232.19192505866226,
+        199.70465977544978
+      ],
+      "color": [
+        229,
+        45,
+        168
+      ]
+    },
+    "cluster_2": {
+      "head_id": "vehicle_012",
+      "member_count": 19,
+      "centroid": [
+        397.49204477967805,
+        0.9239685288204567
+      ],
+      "color": [
+        168,
+        45,
+        229
+      ]
+    },
+    "cluster_3": {
+      "head_id": "vehicle_011",
+      "member_count": 2,
+      "centroid": [
+        317.58566669965063,
+        199.10796499165673
+      ],
+      "color": [
+        168,
+        229,
+        45
+      ]
+    },
+    "cluster_4": {
+      "head_id": "vehicle_027",
+      "member_count": 9,
+      "centroid": [
+        345.6458062176446,
+        3.3431748746692938
+      ],
+      "color": [
+        45,
+        229,
+        45
+      ]
+    },
+    "cluster_5": {
+      "head_id": "vehicle_004",
+      "member_count": 14,
+      "centroid": [
+        262.6083986195804,
+        2.907870227223869
+      ],
+      "color": [
+        45,
+        229,
+        168
+      ]
+    },
+    "cluster_6": {
+      "head_id": "vehicle_031",
+      "member_count": 10,
+      "centroid": [
+        468.5527301810739,
+        6.598880603609828
+      ],
+      "color": [
+        229,
+        168,
+        45
+      ]
+    },
+    "cluster_7": {
+      "head_id": "vehicle_039",
+      "member_count": 2,
+      "centroid": [
+        413.4424950487712,
+        185.93665047699858
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    },
+    "cluster_8": {
+      "head_id": "vehicle_044",
+      "member_count": 6,
+      "centroid": [
+        520.7867175254702,
+        66.0690258631475
+      ],
+      "color": [
+        45,
+        168,
+        229
+      ]
+    }
+  }
+}

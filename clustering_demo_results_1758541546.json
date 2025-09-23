@@ -1,0 +1,77 @@
+{
+  "demo_info": {
+    "duration": 10.0,
+    "total_steps": 100,
+    "algorithm": "mobility_based",
+    "timestamp": 1758541546.7906349
+  },
+  "application_statistics": {
+    "application": {
+      "total_vehicles": 45,
+      "simulation_time": 9.99999999999998,
+      "simulation_steps": 101,
+      "messages_sent": 45,
+      "messages_received": 0,
+      "clusters_formed": 0,
+      "cluster_joins": 0,
+      "cluster_leaves": 0,
+      "head_elections": 0
+    },
+    "clustering": {
+      "total_clusters": 0,
+      "total_clustered_vehicles": 0,
+      "avg_cluster_size": 0,
+      "largest_cluster_size": 0
+    },
+    "cluster_management": {
+      "total_managed_clusters": 0,
+      "average_cluster_quality": 0.0,
+      "average_cluster_lifetime": 0.0,
+      "state_distribution": {},
+      "total_events": 0,
+      "recent_events": 0,
+      "event_type_distribution": {},
+      "head_election_method": "weighted_composite"
+    },
+    "message_processing": {
+      "total_messages_processed": 0,
+      "active_vehicles": 0,
+      "message_type_distribution": {},
+      "pending_responses": 0
+    },
+    "configuration": {
+      "enable_clustering": true,
+      "enable_emergency_handling": true,
+      "max_message_buffer_size": 100,
+      "neighbor_timeout": 10.0,
+      "cluster_announcement_interval": 2.0,
+      "heartbeat_interval": 1.5
+    }
+  },
+  "visualization_statistics": {
+    "visualization_stats": {
+      "updates_performed": 101,
+      "elements_created": 0,
+      "elements_removed": 0,
+      "last_update_time": 3.0994415283203125e-06
+    },
+    "active_elements": {
+      "lines": 0,
+      "polygons": 0,
+      "cluster_colors": 0
+    },
+    "configuration": {
+      "cluster_colors_enabled": true,
+      "head_highlighting_enabled": true,
+      "membership_lines_enabled": true,
+      "cluster_boundaries_enabled": true,
+      "performance_overlay_enabled": true
+    },
+    "update_intervals": {
+      "color_update_interval": 1.0,
+      "line_update_interval": 2.0,
+      "metrics_update_interval": 5.0
+    }
+  },
+  "final_cluster_state": {}
+}
