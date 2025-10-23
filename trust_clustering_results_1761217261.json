@@ -1,0 +1,138 @@
+{
+  "configuration": {
+    "num_vehicles": 30,
+    "num_malicious": 4,
+    "trust_threshold": 0.6,
+    "simulation_duration": 29.5
+  },
+  "trust_statistics": {
+    "average_trust_normal_vehicles": 0.958715120451108,
+    "average_trust_malicious_vehicles": 0.16798704773165762,
+    "malicious_detection_rate": 1.0,
+    "detected_malicious_count": 4,
+    "total_malicious_count": 4
+  },
+  "cluster_statistics": {
+    "final_cluster_count": 6,
+    "cluster_head_trust_compliance": 0.8333333333333334,
+    "compliant_heads": 5,
+    "total_heads": 6
+  },
+  "application_statistics": {
+    "application": {
+      "total_vehicles": 30,
+      "simulation_time": 29.5,
+      "simulation_steps": 60,
+      "messages_sent": 1396,
+      "messages_received": 0,
+      "clusters_formed": 0,
+      "cluster_joins": 285,
+      "cluster_leaves": 204,
+      "head_elections": 0,
+      "trust_evaluations": 0,
+      "malicious_nodes_detected": 0,
+      "consensus_messages": 0,
+      "trust_updates": 0
+    },
+    "clustering": {
+      "total_clusters": 6,
+      "total_clustered_vehicles": 81,
+      "avg_cluster_size": 13.5,
+      "largest_cluster_size": 19,
+      "smallest_cluster_size": 2
+    },
+    "cluster_management": {
+      "total_managed_clusters": 6,
+      "average_cluster_quality": 0.7054946305211819,
+      "average_cluster_lifetime": 20.0,
+      "state_distribution": {
+        "stable": 5,
+        "forming": 1
+      },
+      "total_events": 6,
+      "recent_events": 0,
+      "event_type_distribution": {},
+      "head_election_method": "weighted_composite"
+    },
+    "message_processing": {
+      "total_messages_processed": 0,
+      "active_vehicles": 0,
+      "message_type_distribution": {},
+      "pending_responses": 0
+    },
+    "trust_and_security": {
+      "trust_enabled": false
+    },
+    "configuration": {
+      "enable_clustering": true,
+      "enable_emergency_handling": true,
+      "max_message_buffer_size": 100,
+      "neighbor_timeout": 10.0,
+      "cluster_announcement_interval": 3.0,
+      "heartbeat_interval": 2.0
+    }
+  },
+  "malicious_detections": 22,
+  "detection_events": [
+    {
+      "time": 12.0,
+      "vehicle_id": "m0",
+      "behavior": "deny_service",
+      "trust_score": 0.26237280203302704
+    },
+    {
+      "time": 13.0,
+      "vehicle_id": "m0",
+      "behavior": "deny_service",
+      "trust_score": 0.21437280203302705
+    },
+    {
+      "time": 14.0,
+      "vehicle_id": "m0",
+      "behavior": "sybil_attack",
+      "trust_score": 0.16637280203302707
+    },
+    {
+      "time": 14.5,
+      "vehicle_id": "m0",
+      "behavior": "sybil_attack",
+      "trust_score": 0.11837280203302707
+    },
+    {
+      "time": 18.0,
+      "vehicle_id": "m0",
+      "behavior": "drop_messages",
+      "trust_score": 0.08037280203302706
+    },
+    {
+      "time": 19.0,
+      "vehicle_id": "m0",
+      "behavior": "false_position",
+      "trust_score": 0.03237280203302706
+    },
+    {
+      "time": 19.5,
+      "vehicle_id": "m0",
+      "behavior": "sybil_attack",
+      "trust_score": 0.0
+    },
+    {
+      "time": 20.0,
+      "vehicle_id": "m0",
+      "behavior": "deny_service",
+      "trust_score": 0.0
+    },
+    {
+      "time": 20.5,
+      "vehicle_id": "m0",
+      "behavior": "sybil_attack",
+      "trust_score": 0.0
+    },
+    {
+      "time": 21.5,
+      "vehicle_id": "m0",
+      "behavior": "sybil_attack",
+      "trust_score": 0.0
+    }
+  ]
+}

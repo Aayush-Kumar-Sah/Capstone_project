@@ -136,11 +136,12 @@ class TrustAwareClusterManager(ClusterManager):
             return True
         
         # Trust-based re-election triggers
-        cluster_state = self.cluster_states.get(cluster_id)
-        if not cluster_state or not cluster_state.cluster:
+        # Get the cluster from clustering engine
+        cluster = self.clustering_engine.clusters.get(cluster_id)
+        if not cluster:
             return False
         
-        current_head = cluster_state.cluster.head_id
+        current_head = cluster.head_id
         if not current_head:
             return True
         

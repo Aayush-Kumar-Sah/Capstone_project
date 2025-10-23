@@ -1,0 +1,237 @@
+{
+  "timestamp": 1759141380.3616977,
+  "cluster_colors": {
+    "cluster_6": [
+      229,
+      45,
+      45
+    ],
+    "cluster_5": [
+      229,
+      203,
+      45
+    ],
+    "cluster_0": [
+      45,
+      229,
+      150
+    ],
+    "cluster_4": [
+      229,
+      45,
+      203
+    ],
+    "cluster_12": [
+      229,
+      45,
+      45
+    ],
+    "cluster_9": [
+      137,
+      229,
+      45
+    ],
+    "cluster_11": [
+      45,
+      229,
+      229
+    ],
+    "cluster_10": [
+      137,
+      45,
+      229
+    ],
+    "cluster_13": [
+      229,
+      45,
+      45
+    ],
+    "cluster_14": [
+      45,
+      229,
+      229
+    ],
+    "cluster_16": [
+      229,
+      45,
+      45
+    ],
+    "cluster_15": [
+      45,
+      229,
+      229
+    ]
+  },
+  "active_lines": [],
+  "active_polygons": [],
+  "statistics": {
+    "updates_performed": 600,
+    "elements_created": 0,
+    "elements_removed": 0,
+    "last_update_time": 4.0531158447265625e-06
+  },
+  "config": {
+    "show_cluster_colors": true,
+    "show_head_highlighting": true,
+    "show_membership_lines": true,
+    "show_cluster_boundaries": true
+  },
+  "clusters": {
+    "cluster_0": {
+      "head_id": "vehicle_004",
+      "member_count": 3,
+      "centroid": [
+        967.2264853579577,
+        198.76615770184875
+      ],
+      "color": [
+        45,
+        229,
+        150
+      ]
+    },
+    "cluster_4": {
+      "head_id": "vehicle_032",
+      "member_count": 2,
+      "centroid": [
+        32.67087804802527,
+        4.780253231623674
+      ],
+      "color": [
+        229,
+        45,
+        203
+      ]
+    },
+    "cluster_5": {
+      "head_id": "vehicle_038",
+      "member_count": 2,
+      "centroid": [
+        417.5681440527127,
+        62.60272360042342
+      ],
+      "color": [
+        229,
+        203,
+        45
+      ]
+    },
+    "cluster_6": {
+      "head_id": "vehicle_044",
+      "member_count": 7,
+      "centroid": [
+        526.9057936159355,
+        118.16194875739619
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    },
+    "cluster_9": {
+      "head_id": "vehicle_012",
+      "member_count": 10,
+      "centroid": [
+        787.2556987654376,
+        2.6418629790947232
+      ],
+      "color": [
+        137,
+        229,
+        45
+      ]
+    },
+    "cluster_10": {
+      "head_id": "vehicle_014",
+      "member_count": 4,
+      "centroid": [
+        943.9676206921254,
+        198.48002042550104
+      ],
+      "color": [
+        137,
+        45,
+        229
+      ]
+    },
+    "cluster_11": {
+      "head_id": "vehicle_021",
+      "member_count": 13,
+      "centroid": [
+        874.3651022940576,
+        3.9376227472151544
+      ],
+      "color": [
+        45,
+        229,
+        229
+      ]
+    },
+    "cluster_12": {
+      "head_id": "vehicle_037",
+      "member_count": 5,
+      "centroid": [
+        552.9681169594344,
+        4.562814182117854
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    },
+    "cluster_13": {
+      "head_id": "vehicle_035",
+      "member_count": 10,
+      "centroid": [
+        945.9390087113604,
+        5.942480510129165
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    },
+    "cluster_14": {
+      "head_id": "vehicle_016",
+      "member_count": 10,
+      "centroid": [
+        900.3369834084442,
+        1.2929370007339602
+      ],
+      "color": [
+        45,
+        229,
+        229
+      ]
+    },
+    "cluster_15": {
+      "head_id": "vehicle_016",
+      "member_count": 10,
+      "centroid": [
+        92.33627355270164,
+        2.823663746739509
+      ],
+      "color": [
+        45,
+        229,
+        229
+      ]
+    },
+    "cluster_16": {
+      "head_id": "vehicle_030",
+      "member_count": 10,
+      "centroid": [
+        901.2556134709564,
+        4.3059649112244545
+      ],
+      "color": [
+        229,
+        45,
+        45
+      ]
+    }
+  }
+}

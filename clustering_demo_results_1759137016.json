@@ -1,0 +1,298 @@
+{
+  "demo_info": {
+    "duration": 30.0,
+    "total_steps": 300,
+    "algorithm": "mobility_based",
+    "timestamp": 1759137016.0577807
+  },
+  "application_statistics": {
+    "application": {
+      "total_vehicles": 45,
+      "simulation_time": 29.900000000000155,
+      "simulation_steps": 300,
+      "messages_sent": 1645,
+      "messages_received": 0,
+      "clusters_formed": 0,
+      "cluster_joins": 179,
+      "cluster_leaves": 127,
+      "head_elections": 13,
+      "trust_evaluations": 0,
+      "malicious_nodes_detected": 0,
+      "consensus_messages": 0,
+      "trust_updates": 0
+    },
+    "clustering": {
+      "total_clusters": 10,
+      "total_clustered_vehicles": 79,
+      "avg_cluster_size": 7.9,
+      "largest_cluster_size": 13,
+      "smallest_cluster_size": 2
+    },
+    "cluster_management": {
+      "total_managed_clusters": 10,
+      "average_cluster_quality": 0.641169460681249,
+      "average_cluster_lifetime": 15.640000000000084,
+      "state_distribution": {
+        "stable": 7,
+        "forming": 3
+      },
+      "total_events": 24,
+      "recent_events": 0,
+      "event_type_distribution": {},
+      "head_election_method": "weighted_composite"
+    },
+    "message_processing": {
+      "total_messages_processed": 0,
+      "active_vehicles": 0,
+      "message_type_distribution": {},
+      "pending_responses": 0
+    },
+    "trust_and_security": {
+      "trust_enabled": false
+    },
+    "configuration": {
+      "enable_clustering": true,
+      "enable_emergency_handling": true,
+      "max_message_buffer_size": 100,
+      "neighbor_timeout": 10.0,
+      "cluster_announcement_interval": 2.0,
+      "heartbeat_interval": 1.5
+    }
+  },
+  "visualization_statistics": {
+    "visualization_stats": {
+      "updates_performed": 300,
+      "elements_created": 0,
+      "elements_removed": 0,
+      "last_update_time": 3.5762786865234375e-06
+    },
+    "active_elements": {
+      "lines": 0,
+      "polygons": 0,
+      "cluster_colors": 10
+    },
+    "configuration": {
+      "cluster_colors_enabled": true,
+      "head_highlighting_enabled": true,
+      "membership_lines_enabled": true,
+      "cluster_boundaries_enabled": true,
+      "performance_overlay_enabled": true
+    },
+    "update_intervals": {
+      "color_update_interval": 1.0,
+      "line_update_interval": 2.0,
+      "metrics_update_interval": 5.0
+    }
+  },
+  "final_cluster_state": {
+    "cluster_0": {
+      "head_id": "vehicle_010",
+      "member_ids": [
+        "vehicle_003",
+        "vehicle_002",
+        "vehicle_015",
+        "vehicle_009"
+      ],
+      "size": 5,
+      "centroid": [
+        925.90580329563,
+        198.1565515961444
+      ],
+      "avg_speed": 26.367383269013217,
+      "avg_direction": 0.0,
+      "formation_time": 4.999999999999998,
+      "last_update": 25.200000000000088
+    },
+    "cluster_1": {
+      "head_id": "vehicle_004",
+      "member_ids": [
+        "vehicle_025",
+        "vehicle_020",
+        "vehicle_023",
+        "vehicle_027",
+        "vehicle_019",
+        "vehicle_018",
+        "vehicle_024",
+        "vehicle_021",
+        "vehicle_026",
+        "vehicle_017",
+        "vehicle_022",
+        "vehicle_008"
+      ],
+      "size": 13,
+      "centroid": [
+        370.1407654957933,
+        4.55357876203985
+      ],
+      "avg_speed": 22.749447585688515,
+      "avg_direction": 0.0,
+      "formation_time": 4.999999999999998,
+      "last_update": 20.200000000000017
+    },
+    "cluster_2": {
+      "head_id": "vehicle_018",
+      "member_ids": [
+        "vehicle_025",
+        "vehicle_023",
+        "vehicle_027",
+        "vehicle_011",
+        "vehicle_024",
+        "vehicle_026",
+        "vehicle_017",
+        "vehicle_022",
+        "vehicle_008"
+      ],
+      "size": 10,
+      "centroid": [
+        406.87519045755926,
+        1.8437507467195038
+      ],
+      "avg_speed": 17.623703953496708,
+      "avg_direction": 0.0,
+      "formation_time": 4.999999999999998,
+      "last_update": 20.200000000000017
+    },
+    "cluster_3": {
+      "head_id": "vehicle_030",
+      "member_ids": [
+        "vehicle_028",
+        "vehicle_033",
+        "vehicle_029",
+        "vehicle_037",
+        "vehicle_034",
+        "vehicle_035",
+        "vehicle_036",
+        "vehicle_031",
+        "vehicle_032"
+      ],
+      "size": 10,
+      "centroid": [
+        132.81699164207407,
+        6.8020169800893076
+      ],
+      "avg_speed": 16.841262444848446,
+      "avg_direction": 3.14159,
+      "formation_time": 4.999999999999998,
+      "last_update": 25.200000000000088
+    },
+    "cluster_4": {
+      "head_id": "vehicle_039",
+      "member_ids": [
+        "vehicle_038"
+      ],
+      "size": 2,
+      "centroid": [
+        421.94107074276474,
+        85.78972790464867
+      ],
+      "avg_speed": 15.054961812822103,
+      "avg_direction": 1.57,
+      "formation_time": 4.999999999999998,
+      "last_update": 25.200000000000088
+    },
+    "cluster_5": {
+      "head_id": "vehicle_045",
+      "member_ids": [
+        "vehicle_040",
+        "vehicle_044",
+        "vehicle_042",
+        "vehicle_043",
+        "vehicle_041"
+      ],
+      "size": 6,
+      "centroid": [
+        522.3352300345399,
+        135.3044825910447
+      ],
+      "avg_speed": 14.462311822436845,
+      "avg_direction": 1.57,
+      "formation_time": 4.999999999999998,
+      "last_update": 25.200000000000088
+    },
+    "cluster_6": {
+      "head_id": "vehicle_026",
+      "member_ids": [
+        "vehicle_025",
+        "vehicle_004",
+        "vehicle_023",
+        "vehicle_019",
+        "vehicle_027",
+        "vehicle_022",
+        "vehicle_024",
+        "vehicle_021",
+        "vehicle_011",
+        "vehicle_008"
+      ],
+      "size": 11,
+      "centroid": [
+        685.7240816481346,
+        3.968572590480472
+      ],
+      "avg_speed": 21.450262908704996,
+      "avg_direction": 0.0,
+      "formation_time": 10.09999999999998,
+      "last_update": 25.200000000000088
+    },
+    "cluster_7": {
+      "head_id": "vehicle_014",
+      "member_ids": [
+        "vehicle_012",
+        "vehicle_006",
+        "vehicle_013",
+        "vehicle_011",
+        "vehicle_007",
+        "vehicle_008"
+      ],
+      "size": 7,
+      "centroid": [
+        928.0337685943384,
+        2.6051919097486484
+      ],
+      "avg_speed": 25.05522246389978,
+      "avg_direction": 0.0,
+      "formation_time": 10.09999999999998,
+      "last_update": 25.200000000000088
+    },
+    "cluster_8": {
+      "head_id": "vehicle_002",
+      "member_ids": [
+        "vehicle_001",
+        "vehicle_020",
+        "vehicle_003",
+        "vehicle_023",
+        "vehicle_005"
+      ],
+      "size": 6,
+      "centroid": [
+        657.6882745953334,
+        199.21859214117293
+      ],
+      "avg_speed": 22.00342101729059,
+      "avg_direction": 0.0,
+      "formation_time": 20.200000000000017,
+      "last_update": 25.200000000000088
+    },
+    "cluster_9": {
+      "head_id": "vehicle_026",
+      "member_ids": [
+        "vehicle_016",
+        "vehicle_027",
+        "vehicle_019",
+        "vehicle_018",
+        "vehicle_024",
+        "vehicle_021",
+        "vehicle_017",
+        "vehicle_022"
+      ],
+      "size": 9,
+      "centroid": [
+        707.7170808463729,
+        4.736138230873343
+      ],
+      "avg_speed": 18.882224255041667,
+      "avg_direction": 0.0,
+      "formation_time": 25.200000000000088,
+      "last_update": 25.200000000000088
+    }
+  }
+}

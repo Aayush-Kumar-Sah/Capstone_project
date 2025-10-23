@@ -8,7 +8,7 @@ direction, speed, and proximity.
 
 import math
 import statistics
-from typing import List, Dict, Tuple, Optional, Set
+from typing import List, Dict, Tuple, Optional, Set, Callable
 from dataclasses import dataclass
 from enum import Enum
 import logging
@@ -88,9 +88,57 @@ class VehicleClustering:
         self.speed_threshold = 5.0  # m/s difference
         self.direction_threshold = 0.5  # radians difference
         self.cluster_lifetime_threshold = 30.0  # seconds
+        
+        # Trust-based filtering (optional callbacks)
+        self.trust_provider: Optional[Callable[[str], float]] = None
+        self.malicious_checker: Optional[Callable[[str], bool]] = None
+        self.min_trust_for_clustering = 0.3  # Minimum trust to participate in clustering
+        self.trust_filtering_enabled = False
+    
+    def set_trust_provider(self, trust_provider: Callable[[str], float]):
+        """Set trust score provider function"""
+        self.trust_provider = trust_provider
+        self.trust_filtering_enabled = True
+    
+    def set_malicious_checker(self, malicious_checker: Callable[[str], bool]):
+        """Set malicious node checker function"""
+        self.malicious_checker = malicious_checker
+    
+    def get_trust_score(self, vehicle_id: str) -> float:
+        """Get trust score for a vehicle"""
+        if self.trust_provider:
+            return self.trust_provider(vehicle_id)
+        return 1.0  # Default high trust if no provider
+    
+    def is_malicious(self, vehicle_id: str) -> bool:
+        """Check if vehicle is malicious"""
+        if self.malicious_checker:
+            return self.malicious_checker(vehicle_id)
+        return False  # Default not malicious if no checker
+    
+    def is_vehicle_trustworthy_for_clustering(self, vehicle_id: str) -> bool:
+        """Check if vehicle meets trust requirements for clustering"""
+        if not self.trust_filtering_enabled:
+            return True  # Trust filtering disabled
+        
+        # Exclude malicious vehicles
+        if self.is_malicious(vehicle_id):
+            return False
+        
+        # Check minimum trust threshold
+        trust_score = self.get_trust_score(vehicle_id)
+        return trust_score >= self.min_trust_for_clustering
     
     def update_vehicles(self, vehicles: List[Vehicle]) -> Dict[str, Cluster]:
         """Update clustering based on current vehicle positions"""
+        # Filter out untrustworthy vehicles if trust filtering is enabled
+        if self.trust_filtering_enabled:
+            trustworthy_vehicles = [v for v in vehicles if self.is_vehicle_trustworthy_for_clustering(v.id)]
+            filtered_count = len(vehicles) - len(trustworthy_vehicles)
+            if filtered_count > 0:
+                self.logger.info(f"Trust filtering: excluded {filtered_count} untrustworthy vehicles from clustering")
+            vehicles = trustworthy_vehicles
+        
         if self.algorithm == ClusteringAlgorithm.MOBILITY_BASED:
             return self._mobility_based_clustering(vehicles)
         elif self.algorithm == ClusteringAlgorithm.DIRECTION_BASED:

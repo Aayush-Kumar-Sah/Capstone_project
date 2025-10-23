@@ -1,0 +1,102 @@
+{
+  "metadata": {
+    "algorithm": "MOBILITY_BASED",
+    "duration": 40.0,
+    "num_vehicles": 35,
+    "timestamp": 1761213044.6701026
+  },
+  "statistics": {
+    "application": {
+      "total_vehicles": 35,
+      "simulation_time": 39.900000000000006,
+      "simulation_steps": 401,
+      "messages_sent": 1607,
+      "messages_received": 0,
+      "clusters_formed": 0,
+      "cluster_joins": 95,
+      "cluster_leaves": 53,
+      "head_elections": 24,
+      "trust_evaluations": 35,
+      "malicious_nodes_detected": 0,
+      "consensus_messages": 0,
+      "trust_updates": 3
+    },
+    "clustering": {
+      "total_clusters": 6,
+      "total_clustered_vehicles": 33,
+      "avg_cluster_size": 5.5,
+      "largest_cluster_size": 9,
+      "smallest_cluster_size": 4
+    },
+    "cluster_management": {
+      "total_managed_clusters": 6,
+      "average_cluster_quality": 0.572120716170216,
+      "average_cluster_lifetime": 29.166666666666668,
+      "state_distribution": {
+        "stable": 2,
+        "forming": 4
+      },
+      "total_events": 38,
+      "recent_events": 0,
+      "event_type_distribution": {},
+      "head_election_method": "weighted_composite"
+    },
+    "message_processing": {
+      "total_messages_processed": 0,
+      "active_vehicles": 0,
+      "message_type_distribution": {},
+      "pending_responses": 0
+    },
+    "trust_and_security": {
+      "trust_enabled": true,
+      "total_nodes": 35,
+      "trusted_nodes": 6,
+      "malicious_nodes": 3,
+      "average_trust_score": 0.674094969382181,
+      "trust_evaluations": 35,
+      "malicious_detections": 0,
+      "trust_updates": 3,
+      "consensus_messages": 0,
+      "authority_nodes": 3,
+      "consensus_stats": {
+        "node_id": "main_node",
+        "consensus_type": "hybrid",
+        "is_leader": false,
+        "current_leader": "authority_001",
+        "trust_evaluations": 35,
+        "malicious_reports": 0,
+        "raft": {
+          "state": "follower",
+          "current_term": 0,
+          "log_length": 0,
+          "cluster_size": 1
+        },
+        "poa": {
+          "authorities": 3,
+          "authority_scores": {
+            "authority_001": 1.0,
+            "authority_002": 1.0,
+            "authority_003": 1.0
+          },
+          "current_leader": "authority_001"
+        }
+      }
+    },
+    "configuration": {
+      "enable_clustering": true,
+      "enable_emergency_handling": true,
+      "max_message_buffer_size": 100,
+      "neighbor_timeout": 10.0,
+      "cluster_announcement_interval": 3.0,
+      "heartbeat_interval": 2.0
+    }
+  },
+  "summary": {
+    "total_frames": 401,
+    "cluster_events": 5,
+    "head_changes": 0,
+    "avg_clusters": 6.85785536159601,
+    "max_clusters": 10,
+    "min_clusters": 0
+  }
+}

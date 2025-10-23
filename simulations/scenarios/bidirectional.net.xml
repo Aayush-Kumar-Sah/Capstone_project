@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2025-10-22 22:38:59 by Eclipse SUMO netconvert Version v1_22_0+1117-c9eb8b8e9d6
+<netconvertConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <node-files value="bidirectional.nod.xml"/>
+        <edge-files value="bidirectional.edg.xml"/>
+    </input>
+
+    <output>
+        <output-file value="bidirectional.net.xml"/>
+    </output>
+
+    <processing>
+        <geometry.remove value="true"/>
+        <roundabouts.guess value="true"/>
+    </processing>
+
+    <junctions>
+        <no-turnarounds value="true"/>
+    </junctions>
+
+</netconvertConfiguration>
+-->
+
+<net version="1.20" junctionCornerDetail="5" limitTurnSpeed="5.50" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="0.00,0.00" convBoundary="0.00,0.00,2000.00,0.00" origBoundary="0.00,0.00,2000.00,0.00" projParameter="!"/>
+
+    <edge id="east_1" from="start_west" to="end_east" priority="2" shape="0.00,0.00 500.00,0.00 1000.00,0.00 1500.00,0.00 2000.00,0.00">
+        <lane id="east_1_0" index="0" speed="25.00" length="2000.00" shape="0.00,-1.60 500.00,-1.60 1000.00,-1.60 1500.00,-1.60 2000.00,-1.60"/>
+    </edge>
+    <edge id="west_1" from="end_east" to="start_west" priority="2" shape="2000.00,0.00 1500.00,0.00 1000.00,0.00 500.00,0.00 0.00,0.00">
+        <lane id="west_1_0" index="0" speed="25.00" length="2000.00" shape="2000.00,1.60 1500.00,1.60 1000.00,1.60 500.00,1.60 0.00,1.60"/>
+    </edge>
+
+    <junction id="end_east" type="dead_end" x="2000.00" y="0.00" incLanes="east_1_0" intLanes="" shape="2000.00,0.00 2000.00,-3.20 2000.00,0.00"/>
+    <junction id="start_west" type="dead_end" x="0.00" y="0.00" incLanes="west_1_0" intLanes="" shape="0.00,0.00 0.00,3.20 0.00,0.00"/>
+
+</net>

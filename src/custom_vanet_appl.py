@@ -14,7 +14,8 @@ from enum import Enum
 
 # Import our clustering modules
 from .clustering import Vehicle, Cluster, VehicleClustering, ClusteringAlgorithm
-from .cluster_manager import ClusterManager, ClusterState, ClusterMetrics
+from .cluster_manager import ClusterManager, ClusterState, ClusterMetrics, ClusterHeadElectionMethod
+from .trust_aware_cluster_manager import TrustAwareClusterManager
 from .message_processor import (
     MessageProcessor, VANETMessage, MessageType, 
     JoinResponseCode, MergeResponseCode
@@ -102,7 +103,23 @@ class CustomVANETApplication:
         
         # Clustering components
         self.clustering_engine = VehicleClustering(clustering_algorithm)
-        self.cluster_manager = ClusterManager(self.clustering_engine)
+        
+        # Wire trust evaluation into clustering engine
+        self.clustering_engine.set_trust_provider(self._get_vehicle_trust_score)
+        self.clustering_engine.set_malicious_checker(self._is_vehicle_malicious)
+        self.clustering_engine.min_trust_for_clustering = 0.3  # Allow low trust vehicles to participate
+        
+        # Use trust-aware cluster manager for enhanced security
+        self.cluster_manager = TrustAwareClusterManager(self.clustering_engine)
+        self.cluster_manager.head_election_method = ClusterHeadElectionMethod.WEIGHTED_COMPOSITE
+        self.cluster_manager.min_trust_threshold = 0.6  # Minimum trust for cluster heads
+        self.cluster_manager.trust_weight = 0.4  # Weight of trust in head selection
+        self.cluster_manager.exclude_malicious = True  # Exclude malicious nodes
+        
+        # Wire trust evaluation callbacks into cluster manager
+        self.cluster_manager.set_trust_provider(self._get_vehicle_trust_score)
+        self.cluster_manager.set_malicious_checker(self._is_vehicle_malicious)
+        
         self.message_processor = MessageProcessor()
         
         # Consensus and Security components
@@ -223,6 +240,7 @@ class CustomVANETApplication:
         # Update trust evaluations
         if self.trust_enabled and self._should_update_trust():
             self.update_trust_scores()
+            self.apply_trust_decay()
         
         # Clean up old data
         self._cleanup_old_data()
@@ -378,8 +396,118 @@ class CustomVANETApplication:
         node = self.vehicle_nodes[node_id]
         return node.is_malicious or node.trust_score <= self.malicious_threshold
     
+    def _get_vehicle_trust_score(self, vehicle_id: str) -> float:
+        """Internal callback for cluster manager to get trust scores"""
+        if vehicle_id not in self.vehicle_nodes:
+            return 0.5  # Default neutral trust for unknown vehicles
+        return self.vehicle_nodes[vehicle_id].trust_score
+    
+    def _is_vehicle_malicious(self, vehicle_id: str) -> bool:
+        """Internal callback for cluster manager to check malicious status"""
+        return self.is_node_malicious(vehicle_id)
+    
+    def update_trust_on_message_delivery(self, sender_id: str, success: bool):
+        """Update trust score based on message delivery success"""
+        if not self.trust_enabled or sender_id not in self.vehicle_nodes:
+            return
+        
+        node = self.vehicle_nodes[sender_id]
+        
+        if success:
+            # Reward successful message delivery
+            node.message_authenticity_score = min(1.0, node.message_authenticity_score + 0.01)
+            node.behavior_consistency_score = min(1.0, node.behavior_consistency_score + 0.005)
+            node.trust_score = min(1.0, node.trust_score + 0.002)
+        else:
+            # Penalize failed delivery (could be intentional dropping)
+            node.message_authenticity_score = max(0.0, node.message_authenticity_score - 0.02)
+            node.trust_score = max(0.0, node.trust_score - 0.005)
+        
+        self.logger.debug(f"Trust updated for {sender_id} after message delivery: {node.trust_score:.3f}")
+    
+    def update_trust_on_cooperation(self, vehicle_id: str, cooperation_score: float):
+        """Update trust score based on cooperative behavior"""
+        if not self.trust_enabled or vehicle_id not in self.vehicle_nodes:
+            return
+        
+        node = self.vehicle_nodes[vehicle_id]
+        
+        # Update behavior consistency based on cooperation
+        delta = (cooperation_score - 0.5) * 0.02  # Range: -0.01 to +0.01
+        node.behavior_consistency_score = max(0.0, min(1.0, node.behavior_consistency_score + delta))
+        node.trust_score = max(0.0, min(1.0, node.trust_score + delta * 0.5))
+        
+        self.logger.debug(f"Trust updated for {vehicle_id} based on cooperation: {node.trust_score:.3f}")
+    
+    def update_trust_on_cluster_behavior(self, vehicle_id: str, is_head: bool, stability_contribution: float):
+        """Update trust based on cluster behavior"""
+        if not self.trust_enabled or vehicle_id not in self.vehicle_nodes:
+            return
+        
+        node = self.vehicle_nodes[vehicle_id]
+        
+        # Reward stable cluster participation
+        if stability_contribution > 0.7:
+            bonus = 0.003 if is_head else 0.001
+            node.trust_score = min(1.0, node.trust_score + bonus)
+            node.behavior_consistency_score = min(1.0, node.behavior_consistency_score + bonus)
+        
+        # Penalize unstable behavior
+        elif stability_contribution < 0.3:
+            penalty = 0.002 if is_head else 0.001
+            node.trust_score = max(0.0, node.trust_score - penalty)
+            node.behavior_consistency_score = max(0.0, node.behavior_consistency_score - penalty)
+        
+        self.logger.debug(f"Trust updated for {vehicle_id} based on cluster behavior: {node.trust_score:.3f}")
+    
+    def penalize_malicious_behavior(self, vehicle_id: str, severity: float):
+        """Apply trust penalty for detected malicious behavior"""
+        if not self.trust_enabled or vehicle_id not in self.vehicle_nodes:
+            return
+        
+        node = self.vehicle_nodes[vehicle_id]
+        
+        # Significant trust penalty
+        penalty = 0.1 * severity  # Up to 0.1 penalty for severe misbehavior
+        node.trust_score = max(0.0, node.trust_score - penalty)
+        node.message_authenticity_score = max(0.0, node.message_authenticity_score - penalty * 1.5)
+        node.behavior_consistency_score = max(0.0, node.behavior_consistency_score - penalty * 1.2)
+        
+        # Mark as malicious if trust drops too low
+        if node.trust_score < self.malicious_threshold:
+            node.is_malicious = True
+            node.malicious_activity_count += 1
+        
+        self.logger.warning(f"Trust penalized for {vehicle_id} (malicious behavior): {node.trust_score:.3f}")
+    
+    def apply_trust_decay(self):
+        """Apply time-based trust decay for all vehicles"""
+        if not self.trust_enabled:
+            return
+        
+        current_time = self.current_time
+        decay_applied = 0
+        
+        for vehicle_id, node in self.vehicle_nodes.items():
+            # Calculate time since last update
+            inactive_time = current_time - node.last_update
+            
+            # Apply decay for inactive nodes (more than 5 minutes)
+            if inactive_time > 300:
+                hours_inactive = inactive_time / 3600.0
+                decay_factor = (1 - self.trust_decay_rate) ** hours_inactive
+                
+                node.trust_score *= decay_factor
+                node.message_authenticity_score *= decay_factor
+                node.behavior_consistency_score *= decay_factor
+                
+                decay_applied += 1
+        
+        if decay_applied > 0:
+            self.logger.debug(f"Applied trust decay to {decay_applied} inactive vehicles")
+    
     def receive_message(self, message_data: Dict[str, Any]):
-        """Receive and process incoming message"""
+        """Receive and process incoming message (external interface)"""
         try:
             # Convert dictionary to VANETMessage
             message = VANETMessage.from_dict(message_data)
@@ -392,7 +520,8 @@ class CustomVANETApplication:
             # Handle processing result
             self._handle_message_processing_result(message, result)
             
-            self.statistics['messages_received'] += 1
+            # Note: messages_received counter is now incremented in _deliver_message_to_vehicle()
+            # to properly count deliveries to each vehicle
             
         except Exception as e:
             self.logger.error(f"Error processing message: {e}")
@@ -475,6 +604,8 @@ class CustomVANETApplication:
             cluster = self.clustering_engine.clusters.get(node.cluster_id)
         
         message = self.message_processor.create_beacon_message(vehicle, cluster)
+        # Set timestamp to simulation time (not real system time)
+        message.timestamp = self.current_time
         self._send_message(message)
     
     def _update_clustering(self):
@@ -505,6 +636,10 @@ class CustomVANETApplication:
         
         # Update vehicle node cluster assignments
         self._update_vehicle_cluster_assignments(clusters)
+        
+        # Update trust scores based on cluster stability (if trust enabled)
+        if self.trust_enabled:
+            self._update_trust_from_cluster_stability(clusters)
         
         # Process management actions
         self._process_cluster_management_actions(management_actions)
@@ -575,6 +710,33 @@ class CustomVANETApplication:
                                 vehicle, cluster_id, target_head_id
                             )
                             self._send_message(join_message)
+    
+    def _update_trust_from_cluster_stability(self, clusters: Dict[str, Cluster]):
+        """Update trust scores based on cluster stability contributions"""
+        for cluster_id, cluster in clusters.items():
+            # Get cluster metrics if available
+            metrics = self.cluster_manager.cluster_metrics.get(cluster_id)
+            if not metrics:
+                continue
+            
+            stability_score = metrics.stability_score
+            
+            # Update trust for cluster head
+            if cluster.head_id in self.vehicle_nodes:
+                self.update_trust_on_cluster_behavior(
+                    cluster.head_id, 
+                    is_head=True, 
+                    stability_contribution=stability_score
+                )
+            
+            # Update trust for cluster members
+            for member_id in cluster.member_ids:
+                if member_id in self.vehicle_nodes:
+                    self.update_trust_on_cluster_behavior(
+                        member_id, 
+                        is_head=False, 
+                        stability_contribution=stability_score
+                    )
     
     def _process_cluster_management_actions(self, actions: Dict[str, Any]):
         """Process cluster management actions"""
@@ -760,6 +922,19 @@ class CustomVANETApplication:
         if message.source_id in cluster.member_ids or message.source_id == cluster.head_id:
             return JoinResponseCode.JOIN_REJECTED_DUPLICATE
         
+        # Trust-based validation: Check if requesting vehicle is trustworthy
+        if self.trust_enabled:
+            # Reject malicious vehicles
+            if self.is_node_malicious(message.source_id):
+                self.logger.warning(f"Join request rejected: vehicle {message.source_id} is malicious")
+                return JoinResponseCode.JOIN_REJECTED_INCOMPATIBLE
+            
+            # Check minimum trust threshold for cluster membership
+            requester_trust = self._get_vehicle_trust_score(message.source_id)
+            if requester_trust < 0.4:  # Minimum trust for joining (lower than head threshold)
+                self.logger.info(f"Join request rejected: vehicle {message.source_id} trust score {requester_trust:.2f} too low")
+                return JoinResponseCode.JOIN_REJECTED_INCOMPATIBLE
+        
         # Check compatibility (simplified)
         speed_diff = abs(message.speed - cluster.avg_speed)
         direction_diff = abs(message.direction - cluster.avg_direction)
@@ -855,10 +1030,20 @@ class CustomVANETApplication:
             self.message_queue[message_id] = message.to_dict()
             
             self.statistics['messages_sent'] += 1
+            
+            # Update trust for successful message creation
+            if self.trust_enabled:
+                self.update_trust_on_message_delivery(message.source_id, success=True)
+            
             return True
             
         except Exception as e:
             self.logger.error(f"Error sending message: {e}")
+            
+            # Penalize trust for failed message sending
+            if self.trust_enabled:
+                self.update_trust_on_message_delivery(message.source_id, success=False)
+            
             return False
     
     def _process_message_queue(self):
@@ -962,26 +1147,71 @@ class CustomVANETApplication:
         # In a real VANET system, each vehicle would have its own application instance
         # For simulation, we track deliveries to different vehicles
         self.logger.debug(f"Delivering message {message_data.get('message_type', 'UNKNOWN')} to vehicle {vehicle_id}")
-        self.receive_message(message_data)
+        
+        # Increment received message counter for this delivery
+        self.statistics['messages_received'] += 1
+        
+        # Add message to vehicle's buffer
+        if vehicle_id in self.vehicle_nodes:
+            node = self.vehicle_nodes[vehicle_id]
+            node.message_buffer.append(message_data)
+            
+            # Process the message for this vehicle
+            self._process_received_message(message_data, vehicle_id)
+    
+    def _process_received_message(self, message_data: Dict[str, Any], receiver_id: str):
+        """Process a message received by a specific vehicle"""
+        try:
+            message = VANETMessage.from_dict(message_data)
+            
+            # Update neighbor information from beacons
+            if message.message_type == 'BEACON' and receiver_id in self.vehicle_nodes:
+                receiver_node = self.vehicle_nodes[receiver_id]
+                receiver_node.neighbors.add(message.source_id)
+            
+            # Handle cluster-specific messages
+            elif message.message_type in ['CLUSTER_JOIN_REQUEST', 'CLUSTER_HEAD_ANNOUNCEMENT']:
+                # Process clustering messages
+                result = self.message_processor.process_message(message, self.current_time)
+                if result:
+                    self._handle_message_processing_result(message, result)
+            
+        except Exception as e:
+            self.logger.error(f"Error processing received message for {receiver_id}: {e}")
     
     def _should_deliver_message(self, message: VANETMessage) -> bool:
         """Determine if message should be delivered (improved routing)"""
-        # Check message age (small delay for network transmission)
+        # Check message age - messages sent in previous timesteps can be delivered
+        # Since our simulation uses 0.5s timesteps, any message older than the current
+        # timestep boundary can be delivered
         message_age = self.current_time - message.timestamp
-        if message_age < 0.05:  # 50ms minimum transmission delay
+        
+        # Allow delivery after at least one simulation processing cycle
+        # This prevents same-timestep delivery but allows next-step delivery
+        if message_age <= 0:  # Same timestamp, not yet processed
             return False
         
-        # For clustering demo, deliver messages to nearby vehicles
-        if message.message_type in ['BEACON', 'CLUSTER_JOIN_REQUEST', 'CLUSTER_HEAD_ANNOUNCEMENT']:
-            # Always deliver clustering messages after delay
+        # Check if message is expired
+        if message.is_expired(self.current_time):
+            self.logger.debug(f"Message {message.message_type} from {message.source_id} expired")
+            return False
+        
+        # For clustering messages, always deliver after delay
+        if message.message_type in ['BEACON', 'CLUSTER_JOIN_REQUEST', 'CLUSTER_HEAD_ANNOUNCEMENT',
+                                     'CLUSTER_HEARTBEAT', 'CLUSTER_ELECTION', 'CLUSTER_HANDOVER',
+                                     'CLUSTER_MERGE_REQUEST', 'CLUSTER_SPLIT_NOTIFICATION',
+                                     'CLUSTER_LEAVE_NOTIFICATION', 'CLUSTER_JOIN_RESPONSE']:
             return True
         
-        # For other messages, check if there are target vehicles
+        # For targeted messages, check if target exists
         if hasattr(message, 'target_id') and message.target_id:
-            # Targeted message - deliver if target exists
             return message.target_id in self.vehicle_nodes
         
-        # Broadcast messages - deliver to all vehicles after delay
+        # For data and emergency messages, deliver to nearby vehicles
+        if message.message_type in ['DATA', 'EMERGENCY']:
+            return True
+        
+        # Broadcast messages - deliver after delay
         return True
     
     def _cleanup_old_data(self):
