@@ -1,0 +1,4 @@
+  File "/home/vboxuser/VANET_CAPStone/city_traffic_simulator.py", line 25
+    from src.custom_vanif __name__ == '__main__':
+                          ^^^^^^^^
+SyntaxError: invalid syntax

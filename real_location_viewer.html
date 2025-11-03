@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-World Location VANET Simulation</title>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #16213e 100%);
+            color: #fff;
+            padding: 15px;
+        }
+        #container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            background: linear-gradient(90deg, #00f2fe, #4facfe, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .location-info {
+            text-align: center;
+            color: #0ff;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        canvas {
+            background: #0a0e27;
+            border: 3px solid #0ff;
+            border-radius: 12px;
+            display: block;
+            margin: 15px auto;
+            box-shadow: 0 0 30px rgba(0,255,255,0.3);
+        }
+        #controls {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        button {
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79,172,254,0.5);
+        }
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #0ff;
+            cursor: pointer;
+        }
+        #stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .stat {
+            background: rgba(0,255,255,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #0ff;
+        }
+        .stat-label {
+            font-size: 11px;
+            color: #aaa;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 22px;
+            font-weight: bold;
+            color: #0ff;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin: 12px 0;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+        label {
+            color: #aaa;
+            margin-right: 8px;
+        }
+        .value {
+            color: #0ff;
+            font-weight: bold;
+            min-width: 70px;
+        }
+        #loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #0ff;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>🌍 Real-World Location-Based VANET Simulation 📍</h1>
+        
+        <div id="loading">
+            Loading real-world traffic simulation...
+        </div>
+        
+        <div id="content" style="display:none;">
+            <div class="location-info" id="locationInfo">📍 Location: Loading...</div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #44ff44;"></div>
+                    <span>Normal</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #ff4444;"></div>
+                    <span>Malicious</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #ffff44;"></div>
+                    <span>Cluster Head</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #ff8800;"></div>
+                    <span>Emergency</span>
+                </div>
+            </div>
+            
+            <canvas id="canvas" width="1200" height="700"></canvas>
+            
+            <div id="controls">
+                <div class="btn-row">
+                    <button id="playBtn">▶️ Play</button>
+                    <button id="resetBtn">🔄 Reset</button>
+                    <label>Speed:</label>
+                    <input type="range" id="speedSlider" min="0.5" max="5" step="0.5" value="1">
+                    <span class="value"><span id="speedVal">1.0</span>x</span>
+                </div>
+                <div class="btn-row">
+                    <label>Timeline:</label>
+                    <input type="range" id="timelineSlider" min="0" max="100" value="0">
+                    <span class="value"><span id="timeVal">0.0</span>s / <span id="totalTime">30.0</span>s</span>
+                </div>
+            </div>
+            
+            <div id="stats">
+                <div class="stat">
+                    <div class="stat-label">📍 Roads</div>
+                    <div class="stat-value" id="roads">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">🔴 Clusters</div>
+                    <div class="stat-value" id="clusters">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">🚗 Vehicles</div>
+                    <div class="stat-value" id="vehicles">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">📤 Sent</div>
+                    <div class="stat-value" id="msgSent">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">📥 Received</div>
+                    <div class="stat-value" id="msgRecv">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        fetch('real_location_animation.json')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                initAnimation(data);
+            })
+            .catch(error => {
+                document.getElementById('loading').innerHTML = '❌ Error: ' + error.message;
+                console.error(error);
+            });
+        
+        function initAnimation(data) {
+            console.log('Real-world simulation loaded:', data.frames.length, 'frames');
+            
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            document.getElementById('locationInfo').textContent = `📍 Location: ${data.metadata.location}`;
+            document.getElementById('roads').textContent = data.roads.length;
+            
+            let frame = 0;
+            let playing = false;
+            let speed = 1.0;
+            const totalFrames = data.frames.length;
+            
+            document.getElementById('timelineSlider').max = totalFrames - 1;
+            document.getElementById('totalTime').textContent = data.metadata.duration.toFixed(1);
+            
+            const trails = {};
+            
+            function drawFrame(idx) {
+                const frameData = data.frames[idx];
+                
+                // Clear
+                ctx.fillStyle = '#0a0e27';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw real roads
+                ctx.strokeStyle = 'rgba(120,120,120,0.7)';
+                ctx.lineWidth = 6;
+                ctx.lineCap = 'round';
+                data.roads.forEach(road => {
+                    ctx.beginPath();
+                    ctx.moveTo(road.x1, road.y1);
+                    ctx.lineTo(road.x2, road.y2);
+                    ctx.stroke();
+                });
+                
+                // Draw road markings
+                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([10, 8]);
+                data.roads.forEach(road => {
+                    ctx.beginPath();
+                    ctx.moveTo(road.x1, road.y1);
+                    ctx.lineTo(road.x2, road.y2);
+                    ctx.stroke();
+                });
+                ctx.setLineDash([]);
+                
+                // Draw intersections
+                data.intersections.forEach(inter => {
+                    ctx.fillStyle = 'rgba(100,100,100,0.6)';
+                    ctx.beginPath();
+                    ctx.arc(inter.x, inter.y, 10, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                
+                // Draw clusters
+                frameData.clusters.forEach((cluster, i) => {
+                    const hue = (i * 137.5) % 360;
+                    ctx.strokeStyle = `hsla(${hue}, 70%, 60%, 0.7)`;
+                    ctx.fillStyle = `hsla(${hue}, 70%, 60%, 0.08)`;
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.arc(cluster.center_x, cluster.center_y, cluster.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                });
+                
+                // Draw vehicles
+                frameData.vehicles.forEach(v => {
+                    // Trail
+                    if (!trails[v.id]) trails[v.id] = [];
+                    trails[v.id].push({x: v.x, y: v.y});
+                    if (trails[v.id].length > 20) trails[v.id].shift();
+                    
+                    const trailColor = v.is_emergency ? 'rgba(255,136,0,0.4)' :
+                                      (v.is_malicious ? 'rgba(255,68,68,0.3)' : 'rgba(68,255,68,0.3)');
+                    ctx.strokeStyle = trailColor;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    trails[v.id].forEach((p, i) => {
+                        if (i === 0) ctx.moveTo(p.x, p.y);
+                        else ctx.lineTo(p.x, p.y);
+                    });
+                    ctx.stroke();
+                    
+                    // Vehicle
+                    const size = v.is_cluster_head ? 10 : 7;
+                    const vColor = v.is_emergency ? '#ff8800' :
+                                  (v.is_cluster_head ? '#ffff44' :
+                                  (v.is_malicious ? '#ff4444' : '#44ff44'));
+                    
+                    ctx.fillStyle = vColor;
+                    ctx.beginPath();
+                    ctx.arc(v.x, v.y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    // Direction arrow
+                    const arrowLen = v.is_emergency ? 18 : 14;
+                    const angle = v.direction * Math.PI / 180;
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(v.x, v.y);
+                    ctx.lineTo(v.x + Math.cos(angle) * arrowLen, v.y + Math.sin(angle) * arrowLen);
+                    ctx.stroke();
+                });
+                
+                // Stats
+                document.getElementById('clusters').textContent = frameData.stats.total_clusters;
+                document.getElementById('vehicles').textContent = frameData.stats.total_vehicles;
+                document.getElementById('msgSent').textContent = frameData.stats.messages_sent;
+                document.getElementById('msgRecv').textContent = frameData.stats.messages_received;
+                document.getElementById('timeVal').textContent = frameData.time.toFixed(1);
+                document.getElementById('timelineSlider').value = idx;
+            }
+            
+            function animate() {
+                if (!playing) return;
+                drawFrame(frame);
+                frame++;
+                if (frame >= totalFrames) frame = 0;
+                setTimeout(() => requestAnimationFrame(animate), (1000 / 30) / speed);
+            }
+            
+            document.getElementById('playBtn').onclick = () => {
+                playing = !playing;
+                document.getElementById('playBtn').textContent = playing ? '⏸️ Pause' : '▶️ Play';
+                if (playing) animate();
+            };
+            
+            document.getElementById('resetBtn').onclick = () => {
+                frame = 0;
+                Object.keys(trails).forEach(k => trails[k] = []);
+                drawFrame(0);
+            };
+            
+            document.getElementById('speedSlider').oninput = (e) => {
+                speed = parseFloat(e.target.value);
+                document.getElementById('speedVal').textContent = speed.toFixed(1);
+            };
+            
+            document.getElementById('timelineSlider').oninput = (e) => {
+                frame = parseInt(e.target.value);
+                drawFrame(frame);
+            };
+            
+            drawFrame(0);
+        }
+    </script>
+</body>
+</html>

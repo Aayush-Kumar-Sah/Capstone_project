@@ -82,11 +82,11 @@ class VehicleClustering:
         self.logger = logging.getLogger(__name__)
         
         # Clustering parameters
-        self.max_cluster_radius = 300.0  # meters
+        self.max_cluster_radius = 450.0  # meters (increased for better coverage)
         self.min_cluster_size = 2
-        self.max_cluster_size = 10
-        self.speed_threshold = 5.0  # m/s difference
-        self.direction_threshold = 0.5  # radians difference
+        self.max_cluster_size = 20  # Allow larger clusters
+        self.speed_threshold = 15.0  # m/s difference (more flexible)
+        self.direction_threshold = 1.0  # radians difference (~57 degrees, more flexible)
         self.cluster_lifetime_threshold = 30.0  # seconds
         
         # Trust-based filtering (optional callbacks)

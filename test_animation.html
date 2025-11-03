@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Animation</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial;
+        }
+        canvas {
+            background: #2a2a2a;
+            border: 2px solid #00ff88;
+            display: block;
+            margin: 20px auto;
+        }
+        #info {
+            text-align: center;
+            color: #00ff88;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; color: #00ff88;">Test: Moving Vehicles</h1>
+    <div id="info">If you see moving dots, the animation works!</div>
+    <canvas id="canvas" width="1000" height="500"></canvas>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Simple moving vehicles
+        const vehicles = [];
+        for (let i = 0; i < 10; i++) {
+            vehicles.push({
+                x: Math.random() * 900,
+                y: 200 + Math.random() * 100,
+                vx: 2 + Math.random() * 3,
+                color: i % 3 === 0 ? '#ff4444' : '#44ff44'
+            });
+        }
+        
+        function animate() {
+            // Clear
+            ctx.fillStyle = '#2a2a2a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw road
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 5]);
+            ctx.beginPath();
+            ctx.moveTo(0, 250);
+            ctx.lineTo(canvas.width, 250);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Update and draw vehicles
+            vehicles.forEach(v => {
+                // Move
+                v.x += v.vx;
+                if (v.x > canvas.width) v.x = 0;
+                
+                // Draw
+                ctx.fillStyle = v.color;
+                ctx.beginPath();
+                ctx.arc(v.x, v.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Arrow
+                ctx.strokeStyle = '#fff';
+                ctx.beginPath();
+                ctx.moveTo(v.x, v.y);
+                ctx.lineTo(v.x + 15, v.y);
+                ctx.stroke();
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        console.log('Animation started!');
+    </script>
+</body>
+</html>

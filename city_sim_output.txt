@@ -1,0 +1,47 @@
+🗽 Times Square NYC-Style VANET Traffic Simulation �
+======================================================================
+
+🏙️  MASSIVE MANHATTAN-STYLE CITY (Times Square Inspired) 🏙️
+======================================================================
+  📍 Grid: 11×11 = 121 intersections
+  🛣️  Roads: 456 road segments
+  📏 Coverage: 3300×3300 pixels
+  🚗 Road Types:
+     - Times Square Central (25 mph) - Heavy traffic
+     - Local Streets (30-35 mph)
+     - Major Avenues (40-45 mph)
+     - Express Highways (55 mph)
+     - Broadway Diagonal (30 mph)
+======================================================================
+Initializing 150 vehicles in city network...
+Running city simulation for 90 seconds...
+Progress: 0.0% - Time: 0.0s - Clusters: 0
+Progress: 5.6% - Time: 5.0s - Clusters: 0
+Progress: 11.1% - Time: 10.0s - Clusters: 19
+Progress: 16.7% - Time: 15.0s - Clusters: 19
+Progress: 22.2% - Time: 20.0s - Clusters: 17
+Progress: 27.8% - Time: 25.0s - Clusters: 16
+Progress: 33.3% - Time: 30.0s - Clusters: 16
+Progress: 38.9% - Time: 35.0s - Clusters: 16
+Progress: 44.4% - Time: 40.0s - Clusters: 16
+Progress: 50.0% - Time: 45.0s - Clusters: 16
+Progress: 55.6% - Time: 50.0s - Clusters: 16
+Progress: 61.1% - Time: 55.0s - Clusters: 16
+Progress: 66.7% - Time: 60.0s - Clusters: 14
+Progress: 72.2% - Time: 65.0s - Clusters: 14
+Progress: 77.8% - Time: 70.0s - Clusters: 14
+Progress: 83.3% - Time: 75.0s - Clusters: 14
+Progress: 88.9% - Time: 80.0s - Clusters: 14
+Progress: 94.4% - Time: 85.0s - Clusters: 14
+Progress: 100.0% - Time: 90.0s - Clusters: 14
+Simulation complete! Captured 181 frames
+
+✅ Animation data exported to: city_animation_data.json
+📊 Total frames: 181
+⏱️  Duration: 90s
+🚦 Intersections: 121
+🛣️  Roads: 456
+
+✅ HTML file will be: city_traffic_animation.html
+
+✅ Done! Now open city_traffic_animation.html to see Times Square traffic!

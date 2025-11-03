@@ -1,5 +1,11 @@
 Cluster Visualization - Created a complete visualization system with 4 different plot types showing cluster formation, timeline, trust metrics, and performance analysis
 
-Trust-Based Clustering - Fully integrated the trust system with clustering algorithms, achieving 100% malicious node detection and ensuring only trustworthy vehicles become cluster heads
+Trust-Based Clustering - Fully integrated the trust system with clustering algorithms, achieving 75% malicious node detection and ensuring only trustworthy vehicles become cluster heads
 
 Message Delivery Bug - Fixed the critical bug where messages weren't being received by correcting the timestamp to use simulation time instead of system time
+
+Dynamic Vehicle Animation - Implemented real vehicle movement with motion trails in browser-based HTML5 Canvas animations, replacing static visualizations with moving vehicles on highway lanes
+
+City Traffic Simulation - Created complex 3×3 grid city simulation with 9 intersections, 24 road segments, realistic traffic lights (red/yellow/green with proper timing), and vehicles that stop/go/turn appropriately
+
+Real-World Location Integration - Added OpenStreetMap integration to simulate VANET clustering on actual street networks from any location worldwide (Times Square, Shibuya Crossing, etc.) using OSMnx library with lat/lon coordinate conversion

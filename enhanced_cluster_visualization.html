@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enhanced VANET Cluster Visualization</title>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 100%);
+            color: #fff;
+            padding: 15px;
+        }
+        #container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            background: linear-gradient(90deg, #00f2fe, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        #main-content {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+        #canvas-container {
+            background: #0a0e27;
+            border: 3px solid #0ff;
+            border-radius: 12px;
+            padding: 10px;
+        }
+        canvas {
+            background: #0a0e27;
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        #legend {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(0,255,255,0.2);
+            height: fit-content;
+        }
+        .legend-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #0ff;
+            text-align: center;
+            border-bottom: 2px solid #0ff;
+            padding-bottom: 10px;
+        }
+        .legend-section {
+            margin-bottom: 20px;
+        }
+        .legend-section-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #4facfe;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        .legend-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .legend-icon.star::after {
+            content: '★';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            color: #fff;
+        }
+        .legend-icon.crown::after {
+            content: '♕';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: #FFD700;
+        }
+        .legend-icon.relay::after {
+            content: '⚡';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+        }
+        .legend-icon.boundary::after {
+            content: '◈';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+        }
+        #controls {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            border: 1px solid rgba(0,255,255,0.2);
+        }
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        button {
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79,172,254,0.5);
+        }
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+        }
+        #stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin: 15px 0;
+        }
+        .stat {
+            background: rgba(0,255,255,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #0ff;
+        }
+        .stat-label {
+            font-size: 11px;
+            color: #aaa;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0ff;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>🚗 Enhanced VANET Cluster Visualization 🚗</h1>
+        
+        <div id="controls">
+            <div class="btn-row">
+                <button onclick="togglePlayPause()">⏯️ Play/Pause</button>
+                <button onclick="resetAnimation()">🔄 Reset</button>
+                <button onclick="prevFrame()">⏮️ Prev</button>
+                <button onclick="nextFrame()">⏭️ Next</button>
+                <label style="color: #0ff;">Speed:</label>
+                <input type="range" id="speedSlider" min="0.25" max="2" step="0.25" value="1" 
+                       oninput="updateSpeed(this.value)">
+                <span id="speedValue" style="color: #0ff; min-width: 60px;">1.0x</span>
+            </div>
+        </div>
+
+        <div id="stats">
+            <div class="stat">
+                <div class="stat-label">Frame</div>
+                <div class="stat-value" id="frameCount">0 / 0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Time</div>
+                <div class="stat-value" id="simTime">0.0s</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Total Clusters</div>
+                <div class="stat-value" id="clusterCount">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Leaders</div>
+                <div class="stat-value" id="leaderCount">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Co-Leaders</div>
+                <div class="stat-value" id="coLeaderCount">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Relay Nodes</div>
+                <div class="stat-value" id="relayCount">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Boundary Nodes</div>
+                <div class="stat-value" id="boundaryCount">0</div>
+            </div>
+        </div>
+
+        <div id="main-content">
+            <div id="canvas-container">
+                <canvas id="canvas" width="3300" height="3300"></canvas>
+            </div>
+
+            <div id="legend">
+                <div class="legend-title">🎨 Node Roles Legend</div>
+                
+                <div class="legend-section">
+                    <div class="legend-section-title">Leadership</div>
+                    <div class="legend-item">
+                        <div class="legend-icon crown" style="background: #FFD700; border: 3px solid #FFF;"></div>
+                        <span><strong>Leader</strong> - Cluster Head (♕)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon star" style="background: #FF6B6B; border: 3px solid #FFF;"></div>
+                        <span><strong>Co-Leader</strong> - Backup (★)</span>
+                    </div>
+                </div>
+
+                <div class="legend-section">
+                    <div class="legend-section-title">Special Roles</div>
+                    <div class="legend-item">
+                        <div class="legend-icon relay" style="background: #4ECDC4; border: 3px solid #FFF;"></div>
+                        <span><strong>Relay Node</strong> - Multi-hop (⚡)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon boundary" style="background: #FF9FF3; border: 3px solid #FFF;"></div>
+                        <span><strong>Boundary</strong> - Inter-cluster (◈)</span>
+                    </div>
+                </div>
+
+                <div class="legend-section">
+                    <div class="legend-section-title">Regular Nodes</div>
+                    <div class="legend-item">
+                        <div class="legend-icon" style="background: #95E1D3;"></div>
+                        <span>Member - Regular node</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon" style="background: #F38181;"></div>
+                        <span>Emergency Vehicle</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-icon" style="background: #AA96DA;"></div>
+                        <span>Malicious Node</span>
+                    </div>
+                </div>
+
+                <div class="legend-section">
+                    <div class="legend-section-title">Cluster Visualization</div>
+                    <div class="legend-item">
+                        <div style="width: 24px; height: 24px; border: 2px dashed; border-radius: 50%; opacity: 0.6;"></div>
+                        <span>Cluster Circle (centered on leader)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div style="width: 24px; height: 2px; background: #0ff;"></div>
+                        <span>Leader connections</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let animationData = null;
+        let currentFrame = 0;
+        let isPlaying = false;
+        let animationSpeed = 1.0;
+        let animationInterval = null;
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Load animation data
+        fetch('city_animation_data.json')
+            .then(response => response.json())
+            .then(data => {
+                animationData = data;
+                console.log('Loaded animation data:', animationData.frames.length, 'frames');
+                document.getElementById('frameCount').textContent = `0 / ${animationData.frames.length}`;
+                drawFrame(0);
+            })
+            .catch(error => console.error('Error loading animation data:', error));
+
+        function getClusterColor(clusterId) {
+            // Generate consistent colors based on cluster ID
+            const hash = clusterId.split('').reduce((acc, char) => {
+                return char.charCodeAt(0) + ((acc << 5) - acc);
+            }, 0);
+            
+            const hue = Math.abs(hash % 360);
+            return `hsl(${hue}, 70%, 50%)`;
+        }
+
+        function drawFrame(frameIndex) {
+            if (!animationData || frameIndex >= animationData.frames.length) return;
+            
+            const frame = animationData.frames[frameIndex];
+            currentFrame = frameIndex;
+            
+            // Clear canvas
+            ctx.fillStyle = '#0a0e27';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw roads
+            ctx.strokeStyle = '#1a3a52';
+            ctx.lineWidth = 8;
+            animationData.roads.forEach(road => {
+                ctx.beginPath();
+                ctx.moveTo(road.start_x, road.start_y);
+                ctx.lineTo(road.end_x, road.end_y);
+                ctx.stroke();
+            });
+            
+            // Draw clusters FIRST (as background circles centered on leader)
+            frame.clusters.forEach(cluster => {
+                const color = getClusterColor(cluster.id);
+                
+                // Fill circle with semi-transparent color
+                ctx.fillStyle = color + '20';  // 20 = 12.5% opacity
+                ctx.beginPath();
+                ctx.arc(cluster.center_x, cluster.center_y, cluster.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw border
+                ctx.strokeStyle = color + '60';  // 60 = 37.5% opacity
+                ctx.lineWidth = 2;
+                ctx.setLineDash([10, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Draw cluster label
+                ctx.fillStyle = color;
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(
+                    `${cluster.id} (${cluster.size})`,
+                    cluster.center_x,
+                    cluster.center_y - cluster.radius - 10
+                );
+            });
+            
+            // Count special nodes
+            let leaderCount = 0, coLeaderCount = 0, relayCount = 0, boundaryCount = 0;
+            
+            // Draw connections from leader to members
+            frame.vehicles.forEach(vehicle => {
+                if (vehicle.role === 'leader' && vehicle.cluster_id) {
+                    const leaderX = vehicle.x;
+                    const leaderY = vehicle.y;
+                    
+                    // Draw lines to all cluster members
+                    frame.vehicles.forEach(other => {
+                        if (other.cluster_id === vehicle.cluster_id && other.id !== vehicle.id) {
+                            ctx.strokeStyle = getClusterColor(vehicle.cluster_id) + '40';
+                            ctx.lineWidth = 1;
+                            ctx.setLineDash([5, 3]);
+                            ctx.beginPath();
+                            ctx.moveTo(leaderX, leaderY);
+                            ctx.lineTo(other.x, other.y);
+                            ctx.stroke();
+                            ctx.setLineDash([]);
+                        }
+                    });
+                }
+            });
+            
+            // Draw vehicles with role-based styling
+            frame.vehicles.forEach(vehicle => {
+                let vehicleColor, borderColor, borderWidth, symbol;
+                
+                // Determine color and styling based on role
+                if (vehicle.role === 'leader') {
+                    vehicleColor = '#FFD700';  // Gold
+                    borderColor = '#FFF';
+                    borderWidth = 4;
+                    symbol = '♕';
+                    leaderCount++;
+                } else if (vehicle.role === 'co_leader') {
+                    vehicleColor = '#FF6B6B';  // Red
+                    borderColor = '#FFF';
+                    borderWidth = 4;
+                    symbol = '★';
+                    coLeaderCount++;
+                } else if (vehicle.is_relay) {
+                    vehicleColor = '#4ECDC4';  // Cyan
+                    borderColor = '#FFF';
+                    borderWidth = 3;
+                    symbol = '⚡';
+                    relayCount++;
+                } else if (vehicle.is_boundary) {
+                    vehicleColor = '#FF9FF3';  // Pink
+                    borderColor = '#FFF';
+                    borderWidth = 3;
+                    symbol = '◈';
+                    boundaryCount++;
+                } else if (vehicle.is_emergency) {
+                    vehicleColor = '#F38181';
+                    borderColor = '#FFF';
+                    borderWidth = 2;
+                    symbol = null;
+                } else if (vehicle.is_malicious) {
+                    vehicleColor = '#AA96DA';
+                    borderColor = '#666';
+                    borderWidth = 2;
+                    symbol = null;
+                } else {
+                    vehicleColor = '#95E1D3';
+                    borderColor = vehicle.cluster_id ? getClusterColor(vehicle.cluster_id) : '#555';
+                    borderWidth = 2;
+                    symbol = null;
+                }
+                
+                // Draw vehicle circle
+                const vehicleSize = 10;
+                
+                // Border
+                ctx.fillStyle = borderColor;
+                ctx.beginPath();
+                ctx.arc(vehicle.x, vehicle.y, vehicleSize + borderWidth, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Main circle
+                ctx.fillStyle = vehicleColor;
+                ctx.beginPath();
+                ctx.arc(vehicle.x, vehicle.y, vehicleSize, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw symbol if applicable
+                if (symbol) {
+                    ctx.fillStyle = vehicle.role === 'leader' ? '#000' : '#FFF';
+                    ctx.font = 'bold 16px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(symbol, vehicle.x, vehicle.y);
+                }
+                
+                // Draw direction indicator
+                const dirRad = vehicle.direction * Math.PI / 180;
+                const dx = Math.cos(dirRad) * (vehicleSize + 5);
+                const dy = Math.sin(dirRad) * (vehicleSize + 5);
+                
+                ctx.strokeStyle = borderColor;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(vehicle.x, vehicle.y);
+                ctx.lineTo(vehicle.x + dx, vehicle.y + dy);
+                ctx.stroke();
+            });
+            
+            // Draw traffic lights
+            frame.traffic_lights.forEach(light => {
+                const lightColor = light.state === 'green' ? '#0f0' : 
+                                 light.state === 'yellow' ? '#ff0' : '#f00';
+                ctx.fillStyle = lightColor;
+                ctx.beginPath();
+                ctx.arc(light.x, light.y, 6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Glow effect
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = lightColor;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+            
+            // Update stats
+            document.getElementById('frameCount').textContent = `${frameIndex + 1} / ${animationData.frames.length}`;
+            document.getElementById('simTime').textContent = frame.time.toFixed(1) + 's';
+            document.getElementById('clusterCount').textContent = frame.clusters.length;
+            document.getElementById('leaderCount').textContent = leaderCount;
+            document.getElementById('coLeaderCount').textContent = coLeaderCount;
+            document.getElementById('relayCount').textContent = relayCount;
+            document.getElementById('boundaryCount').textContent = boundaryCount;
+        }
+
+        function togglePlayPause() {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                animationInterval = setInterval(() => {
+                    if (currentFrame < animationData.frames.length - 1) {
+                        drawFrame(currentFrame + 1);
+                    } else {
+                        currentFrame = 0;
+                        drawFrame(0);
+                    }
+                }, 100 / animationSpeed);
+            } else {
+                clearInterval(animationInterval);
+            }
+        }
+
+        function resetAnimation() {
+            isPlaying = false;
+            clearInterval(animationInterval);
+            currentFrame = 0;
+            drawFrame(0);
+        }
+
+        function nextFrame() {
+            if (currentFrame < animationData.frames.length - 1) {
+                drawFrame(currentFrame + 1);
+            }
+        }
+
+        function prevFrame() {
+            if (currentFrame > 0) {
+                drawFrame(currentFrame - 1);
+            }
+        }
+
+        function updateSpeed(value) {
+            animationSpeed = parseFloat(value);
+            document.getElementById('speedValue').textContent = value + 'x';
+            if (isPlaying) {
+                clearInterval(animationInterval);
+                animationInterval = setInterval(() => {
+                    if (currentFrame < animationData.frames.length - 1) {
+                        drawFrame(currentFrame + 1);
+                    } else {
+                        currentFrame = 0;
+                        drawFrame(0);
+                    }
+                }, 100 / animationSpeed);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dynamic VANET - Real Movement</title>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            padding: 20px;
+        }
+        #container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #0ff;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(0,255,255,0.5);
+        }
+        canvas {
+            background: #0a0e27;
+            border: 3px solid #0ff;
+            border-radius: 10px;
+            display: block;
+            margin: 20px auto;
+            box-shadow: 0 0 30px rgba(0,255,255,0.3);
+        }
+        #controls {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        button {
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(79,172,254,0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #0ff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0,255,255,0.5);
+        }
+        #stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat {
+            background: rgba(0,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #0ff;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #aaa;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #0ff;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+        label {
+            color: #aaa;
+            margin-right: 10px;
+        }
+        .value {
+            color: #0ff;
+            font-weight: bold;
+            min-width: 80px;
+        }
+        #loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #0ff;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>🚗 Dynamic VANET Cluster Animation - Real Vehicle Movement 🚗</h1>
+        
+        <div id="loading">Loading animation data...</div>
+        
+        <div id="content" style="display:none;">
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #44ff44;"></div>
+                    <span>Normal Vehicle</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #ff4444;"></div>
+                    <span>Malicious Vehicle</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #ffff44;"></div>
+                    <span>Cluster Head</span>
+                </div>
+                <div class="legend-item">
+                    <div style="width: 16px; height: 16px; border: 2px dashed rgba(0,255,255,0.5); border-radius: 50%;"></div>
+                    <span>Cluster Zone</span>
+                </div>
+            </div>
+            
+            <canvas id="canvas" width="1200" height="600"></canvas>
+            
+            <div id="controls">
+                <div class="btn-group">
+                    <button id="playBtn">▶️ Play</button>
+                    <button id="resetBtn">🔄 Reset</button>
+                    <label>Speed:</label>
+                    <input type="range" id="speedSlider" min="0.5" max="5" step="0.5" value="1">
+                    <span class="value"><span id="speedVal">1.0</span>x</span>
+                </div>
+                <div class="btn-group">
+                    <label>Timeline:</label>
+                    <input type="range" id="timelineSlider" min="0" max="100" value="0">
+                    <span class="value"><span id="timeVal">0.0</span>s / <span id="totalTime">30.0</span>s</span>
+                </div>
+            </div>
+            
+            <div id="stats">
+                <div class="stat">
+                    <div class="stat-label">Clusters</div>
+                    <div class="stat-value" id="clusters">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Vehicles</div>
+                    <div class="stat-value" id="vehicles">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Messages Sent</div>
+                    <div class="stat-value" id="msgSent">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Messages Received</div>
+                    <div class="stat-value" id="msgRecv">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Load animation data
+        fetch('animation_data.json')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                initAnimation(data);
+            })
+            .catch(error => {
+                document.getElementById('loading').innerHTML = '❌ Error loading animation: ' + error.message;
+                console.error('Load error:', error);
+            });
+        
+        function initAnimation(animationData) {
+            console.log('Animation data loaded:', animationData.frames.length, 'frames');
+            
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            let frame = 0;
+            let playing = false;
+            let speed = 1.0;
+            const totalFrames = animationData.frames.length;
+            
+            document.getElementById('timelineSlider').max = totalFrames - 1;
+            document.getElementById('totalTime').textContent = animationData.metadata.duration.toFixed(1);
+            
+            // Vehicle trails
+            const trails = {};
+            
+            function drawFrame(idx) {
+                const data = animationData.frames[idx];
+                
+                // Clear
+                ctx.fillStyle = '#0a0e27';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Road lanes
+                ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([10, 5]);
+                [200, 250, 350, 400].forEach(y => {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvas.width, y);
+                    ctx.stroke();
+                });
+                ctx.setLineDash([]);
+                
+                // Clusters
+                data.clusters.forEach((cluster, i) => {
+                    const hue = (i * 137.5) % 360;
+                    ctx.strokeStyle = `hsla(${hue}, 70%, 60%, 0.8)`;
+                    ctx.fillStyle = `hsla(${hue}, 70%, 60%, 0.1)`;
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.arc(cluster.center_x, cluster.center_y, cluster.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    
+                    // Label
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`Cluster ${cluster.size}`, cluster.center_x, cluster.center_y - cluster.radius - 10);
+                });
+                
+                // Vehicles
+                data.vehicles.forEach(v => {
+                    // Trail
+                    if (!trails[v.id]) trails[v.id] = [];
+                    trails[v.id].push({x: v.x, y: v.y});
+                    if (trails[v.id].length > 20) trails[v.id].shift();
+                    
+                    ctx.strokeStyle = v.is_malicious ? 'rgba(255,68,68,0.3)' : 'rgba(68,255,68,0.3)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    trails[v.id].forEach((p, i) => {
+                        if (i === 0) ctx.moveTo(p.x, p.y);
+                        else ctx.lineTo(p.x, p.y);
+                    });
+                    ctx.stroke();
+                    
+                    // Vehicle dot
+                    const size = v.is_cluster_head ? 10 : 7;
+                    ctx.fillStyle = v.is_cluster_head ? '#ffff44' : (v.is_malicious ? '#ff4444' : '#44ff44');
+                    ctx.beginPath();
+                    ctx.arc(v.x, v.y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    // Arrow
+                    const arrowLen = 15;
+                    const angle = v.direction * Math.PI / 180;
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(v.x, v.y);
+                    ctx.lineTo(v.x + Math.cos(angle) * arrowLen, v.y);
+                    ctx.stroke();
+                });
+                
+                // Stats
+                document.getElementById('clusters').textContent = data.stats.total_clusters;
+                document.getElementById('vehicles').textContent = data.stats.total_vehicles;
+                document.getElementById('msgSent').textContent = data.stats.messages_sent;
+                document.getElementById('msgRecv').textContent = data.stats.messages_received;
+                document.getElementById('timeVal').textContent = data.time.toFixed(1);
+                document.getElementById('timelineSlider').value = idx;
+            }
+            
+            function animate() {
+                if (!playing) return;
+                
+                drawFrame(frame);
+                frame++;
+                if (frame >= totalFrames) frame = 0;
+                
+                setTimeout(() => requestAnimationFrame(animate), (1000 / 30) / speed);
+            }
+            
+            // Controls
+            document.getElementById('playBtn').onclick = () => {
+                playing = !playing;
+                document.getElementById('playBtn').textContent = playing ? '⏸️ Pause' : '▶️ Play';
+                if (playing) animate();
+            };
+            
+            document.getElementById('resetBtn').onclick = () => {
+                frame = 0;
+                Object.keys(trails).forEach(k => trails[k] = []);
+                drawFrame(0);
+            };
+            
+            document.getElementById('speedSlider').oninput = (e) => {
+                speed = parseFloat(e.target.value);
+                document.getElementById('speedVal').textContent = speed.toFixed(1);
+            };
+            
+            document.getElementById('timelineSlider').oninput = (e) => {
+                frame = parseInt(e.target.value);
+                drawFrame(frame);
+            };
+            
+            // Initial draw
+            drawFrame(0);
+        }
+    </script>
+</body>
+</html>
