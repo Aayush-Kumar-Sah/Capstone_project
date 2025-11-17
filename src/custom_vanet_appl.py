@@ -67,6 +67,30 @@ class VehicleNode:
     cluster_join_attempts: int = 0
     last_cluster_update: float = 0.0
     
+    # Improvement 1: Transparent metrics (5-METRIC SYSTEM)
+    bandwidth: float = 100.0  # Mbps (randomized per vehicle)
+    processing_power: float = 2.0  # GHz (randomized per vehicle)
+    historical_trust: List[float] = None  # Track trust over time for sleeper detection
+    social_trust: float = 1.0  # Trust given by neighbors
+    
+    # Metric 3: Network Stability (15% weight)
+    cluster_stability_score: float = 0.0  # How long as cluster head (normalized)
+    connection_quality_score: float = 1.0  # Average signal strength
+    time_as_cluster_head: float = 0.0  # Seconds spent as cluster head
+    last_cluster_head_time: float = 0.0  # When became cluster head
+    
+    # Metric 4: Behavioral Consistency (15% weight)
+    cooperation_rate: float = 1.0  # Successful helps / total requests
+    cooperation_requests: int = 0  # Total cooperation requests received
+    successful_cooperations: int = 0  # Successful cooperation events
+    
+    # Metric 5: Geographic Centrality (10% weight)
+    distance_from_cluster_center: float = 0.0  # Distance from cluster centroid
+    
+    # Improvement 3: Sleeper agent detection
+    is_sleeper_agent: bool = False  # Flagged as sleeper agent
+    trust_peak_detected: bool = False  # Detected suspicious trust spike
+    
     def __post_init__(self):
         if self.neighbors is None:
             self.neighbors = set()
@@ -74,6 +98,13 @@ class VehicleNode:
             self.message_buffer = []
         if self.last_update == 0.0:
             self.last_update = time.time()
+        if self.historical_trust is None:
+            self.historical_trust = [self.trust_score]  # Initialize with current trust
+        
+        # Randomize resource metrics (Improvement 1)
+        import random
+        self.bandwidth = random.uniform(50.0, 150.0)  # 50-150 Mbps
+        self.processing_power = random.uniform(1.0, 4.0)  # 1-4 GHz
     
     def to_vehicle(self) -> Vehicle:
         """Convert to Vehicle object for clustering algorithms"""
@@ -355,7 +386,7 @@ class CustomVANETApplication:
         return True
     
     def update_trust_scores(self):
-        """Update trust scores for all nodes"""
+        """Update trust scores for all nodes with transparent calculation (Improvement 1)"""
         if not self.trust_enabled or not self.consensus_engine:
             return
         
@@ -369,16 +400,249 @@ class CustomVANETApplication:
             # Collect behavior data
             behavior_data = self._collect_behavior_data(node_id)
             
-            # Evaluate trust
+            # Evaluate trust (updates historical trust)
             self.evaluate_node_trust(node_id, behavior_data)
+            
+            # Track historical trust (limit to last 10 samples)
+            if len(node.historical_trust) > 10:
+                node.historical_trust.pop(0)
+            node.historical_trust.append(node.trust_score)
+            
+            # Calculate social trust from neighbors
+            node.social_trust = self._calculate_social_trust(node_id)
+            
+            # TRANSPARENT CALCULATION: 50% historical + 50% social
+            historical_avg = sum(node.historical_trust) / len(node.historical_trust)
+            old_trust = node.trust_score
+            node.trust_score = 0.5 * historical_avg + 0.5 * node.social_trust
+            
+            # Log trust updates for first 3 vehicles (to show transparency)
+            if self.statistics['trust_updates'] < 3 and node_id in list(self.vehicle_nodes.keys())[:3]:
+                print(f"   📊 Trust Update ({node_id}): "
+                      f"Historical={historical_avg:.3f}, Social={node.social_trust:.3f} → "
+                      f"New Trust={node.trust_score:.3f}")
             
             # Apply trust decay for inactive nodes
             if current_time - node.last_update > 3600:  # 1 hour
                 node.trust_score *= (1 - self.trust_decay_rate)
                 node.trust_score = max(0.0, node.trust_score)
+            
+            node.last_trust_update = current_time
         
         self.last_trust_update = current_time
         self.statistics['trust_updates'] += 1
+    
+    def _calculate_social_trust(self, node_id: str) -> float:
+        """
+        Calculate DYNAMIC social trust from neighbors (Improvement 1 - Enhanced)
+        Considers: neighbor trust, neighbor behavior, interaction quality, and malicious flags
+        """
+        if node_id not in self.vehicle_nodes:
+            return 1.0
+        
+        node = self.vehicle_nodes[node_id]
+        neighbors = node.neighbors
+        
+        if not neighbors:
+            return 1.0  # Default if no neighbors
+        
+        # DYNAMIC social trust evaluation
+        social_scores = []
+        
+        for neighbor_id in neighbors:
+            if neighbor_id not in self.vehicle_nodes:
+                continue
+                
+            neighbor = self.vehicle_nodes[neighbor_id]
+            
+            # Base score from neighbor's own trust (how trustworthy is the evaluator?)
+            base_score = neighbor.trust_score
+            
+            # DYNAMIC FACTORS:
+            
+            # 1. Penalize if neighbor is malicious (don't trust opinions from bad actors)
+            if neighbor.is_malicious:
+                base_score *= 0.3  # Heavy penalty
+            
+            # 2. Reward if neighbor has high behavior consistency
+            if hasattr(neighbor, 'behavior_consistency_score'):
+                base_score *= (0.7 + 0.3 * neighbor.behavior_consistency_score)
+            
+            # 3. Consider neighbor's message authenticity (reliable evaluator?)
+            if hasattr(neighbor, 'message_authenticity_score'):
+                base_score *= (0.8 + 0.2 * neighbor.message_authenticity_score)
+            
+            # 4. Reduce weight if neighbor is a sleeper agent (compromised evaluator)
+            if hasattr(neighbor, 'is_sleeper_agent') and neighbor.is_sleeper_agent:
+                base_score *= 0.2  # Very low trust in sleeper opinions
+            
+            # 5. Boost if neighbor is an authority (trusted evaluator)
+            if neighbor.trust_score > 0.8 and not neighbor.is_malicious:
+                base_score *= 1.2  # Authority bonus
+            
+            # Cap score at 1.0
+            base_score = min(1.0, base_score)
+            
+            social_scores.append(base_score)
+        
+        if not social_scores:
+            return 1.0
+        
+        # Return weighted average of all neighbor opinions
+        return sum(social_scores) / len(social_scores)
+    
+    def update_social_trust_on_interaction(self, observer_id: str, observed_id: str, 
+                                           interaction_quality: float):
+        """
+        DYNAMIC: Update social trust based on real-time V2V interactions
+        Called whenever two nodes interact (message exchange, clustering, etc.)
+        
+        Args:
+            observer_id: Node that is evaluating
+            observed_id: Node being evaluated
+            interaction_quality: 0.0 (bad) to 1.0 (good)
+        """
+        if (observer_id not in self.vehicle_nodes or 
+            observed_id not in self.vehicle_nodes):
+            return
+        
+        observer = self.vehicle_nodes[observer_id]
+        observed = self.vehicle_nodes[observed_id]
+        
+        # Track interaction history (if not exists, create it)
+        if not hasattr(observed, 'social_trust_votes'):
+            observed.social_trust_votes = {}
+        
+        # Record this observer's opinion
+        observed.social_trust_votes[observer_id] = interaction_quality
+        
+        # Recalculate social trust immediately (dynamic update)
+        if len(observed.social_trust_votes) > 0:
+            # Weighted average of all recorded opinions
+            total_weight = 0.0
+            weighted_sum = 0.0
+            
+            for evaluator_id, opinion in observed.social_trust_votes.items():
+                if evaluator_id in self.vehicle_nodes:
+                    evaluator = self.vehicle_nodes[evaluator_id]
+                    # Weight by evaluator's trust (trustworthy evaluators count more)
+                    weight = evaluator.trust_score
+                    weighted_sum += opinion * weight
+                    total_weight += weight
+            
+            if total_weight > 0:
+                observed.social_trust = weighted_sum / total_weight
+    
+    def calculate_stability_metric(self, node_id: str, current_time: float) -> float:
+        """
+        METRIC 3: Network Stability (15% weight)
+        Combines cluster stability and connection quality
+        
+        Returns: float between 0.0 and 1.0
+        """
+        if node_id not in self.vehicle_nodes:
+            return 0.0
+        
+        node = self.vehicle_nodes[node_id]
+        
+        # Cluster stability: How long has this node been stable
+        if node.is_cluster_head and node.last_cluster_head_time > 0:
+            node.time_as_cluster_head = current_time - node.last_cluster_head_time
+        
+        # Normalize cluster head time (0-120 seconds simulation time)
+        max_cluster_time = 120.0  # Maximum simulation time
+        cluster_stability = min(1.0, node.time_as_cluster_head / max_cluster_time)
+        node.cluster_stability_score = cluster_stability
+        
+        # Connection quality: Based on number of stable neighbors
+        # More neighbors = better connectivity
+        if len(node.neighbors) > 0:
+            # Normalize by typical cluster size (assume max 20 neighbors)
+            connection_quality = min(1.0, len(node.neighbors) / 20.0)
+        else:
+            connection_quality = 0.0
+        
+        node.connection_quality_score = connection_quality
+        
+        # Stability metric: Average of cluster stability and connection quality
+        stability_metric = (cluster_stability + connection_quality) / 2.0
+        
+        return stability_metric
+    
+    def calculate_behavior_metric(self, node_id: str) -> float:
+        """
+        METRIC 4: Behavioral Consistency (15% weight)
+        Combines message authenticity and cooperation rate
+        
+        Returns: float between 0.0 and 1.0
+        """
+        if node_id not in self.vehicle_nodes:
+            return 0.0
+        
+        node = self.vehicle_nodes[node_id]
+        
+        # Component 1: Message authenticity (already tracked)
+        authenticity = node.message_authenticity_score
+        
+        # Component 2: Cooperation rate
+        if node.cooperation_requests > 0:
+            cooperation = node.successful_cooperations / node.cooperation_requests
+        else:
+            cooperation = 1.0  # No requests = perfect (benefit of doubt)
+        
+        node.cooperation_rate = cooperation
+        
+        # Behavior metric: Average of authenticity and cooperation
+        behavior_metric = (authenticity + cooperation) / 2.0
+        
+        return behavior_metric
+    
+    def calculate_centrality_metric(self, node_id: str, cluster_members: list) -> float:
+        """
+        METRIC 5: Geographic Centrality (10% weight)
+        How close the node is to the cluster's geographic center
+        
+        Args:
+            node_id: Node to evaluate
+            cluster_members: List of node IDs in the cluster
+        
+        Returns: float between 0.0 and 1.0 (1.0 = at center, 0.0 = far away)
+        """
+        if node_id not in self.vehicle_nodes or not cluster_members:
+            return 0.0
+        
+        node = self.vehicle_nodes[node_id]
+        
+        # Calculate cluster centroid
+        centroid_x = 0.0
+        centroid_y = 0.0
+        valid_members = 0
+        
+        for member_id in cluster_members:
+            if member_id in self.vehicle_nodes:
+                member = self.vehicle_nodes[member_id]
+                centroid_x += member.location[0]  # x coordinate
+                centroid_y += member.location[1]  # y coordinate
+                valid_members += 1
+        
+        if valid_members == 0:
+            return 0.0
+        
+        centroid_x /= valid_members
+        centroid_y /= valid_members
+        
+        # Calculate distance from node to centroid
+        distance = ((node.location[0] - centroid_x)**2 + (node.location[1] - centroid_y)**2)**0.5
+        node.distance_from_cluster_center = distance
+        
+        # Normalize distance (assume max cluster radius = 500 meters)
+        max_distance = 500.0  # Communication range
+        normalized_distance = min(1.0, distance / max_distance)
+        
+        # Centrality: 1.0 at center, 0.0 at edge
+        centrality_metric = 1.0 - normalized_distance
+        
+        return centrality_metric
     
     def is_node_trusted(self, node_id: str) -> bool:
         """Check if a node is trusted"""
@@ -406,8 +670,11 @@ class CustomVANETApplication:
         """Internal callback for cluster manager to check malicious status"""
         return self.is_node_malicious(vehicle_id)
     
-    def update_trust_on_message_delivery(self, sender_id: str, success: bool):
-        """Update trust score based on message delivery success"""
+    def update_trust_on_message_delivery(self, sender_id: str, success: bool, receiver_id: str = None):
+        """
+        Update trust score based on message delivery success
+        ENHANCED: Now updates social trust dynamically
+        """
         if not self.trust_enabled or sender_id not in self.vehicle_nodes:
             return
         
@@ -418,15 +685,28 @@ class CustomVANETApplication:
             node.message_authenticity_score = min(1.0, node.message_authenticity_score + 0.01)
             node.behavior_consistency_score = min(1.0, node.behavior_consistency_score + 0.005)
             node.trust_score = min(1.0, node.trust_score + 0.002)
+            
+            # DYNAMIC: Update social trust from receiver's perspective
+            if receiver_id and receiver_id in self.vehicle_nodes:
+                interaction_quality = 0.8  # Good interaction (successful delivery)
+                self.update_social_trust_on_interaction(receiver_id, sender_id, interaction_quality)
         else:
             # Penalize failed delivery (could be intentional dropping)
             node.message_authenticity_score = max(0.0, node.message_authenticity_score - 0.02)
             node.trust_score = max(0.0, node.trust_score - 0.005)
+            
+            # DYNAMIC: Negative social trust update
+            if receiver_id and receiver_id in self.vehicle_nodes:
+                interaction_quality = 0.3  # Bad interaction (failed delivery)
+                self.update_social_trust_on_interaction(receiver_id, sender_id, interaction_quality)
         
         self.logger.debug(f"Trust updated for {sender_id} after message delivery: {node.trust_score:.3f}")
     
-    def update_trust_on_cooperation(self, vehicle_id: str, cooperation_score: float):
-        """Update trust score based on cooperative behavior"""
+    def update_trust_on_cooperation(self, vehicle_id: str, cooperation_score: float, observer_id: str = None):
+        """
+        Update trust score based on cooperative behavior
+        ENHANCED: Now updates social trust dynamically
+        """
         if not self.trust_enabled or vehicle_id not in self.vehicle_nodes:
             return
         
@@ -436,6 +716,11 @@ class CustomVANETApplication:
         delta = (cooperation_score - 0.5) * 0.02  # Range: -0.01 to +0.01
         node.behavior_consistency_score = max(0.0, min(1.0, node.behavior_consistency_score + delta))
         node.trust_score = max(0.0, min(1.0, node.trust_score + delta * 0.5))
+        
+        # DYNAMIC: Update social trust from observer's perspective
+        if observer_id and observer_id in self.vehicle_nodes:
+            # Cooperation score directly becomes interaction quality
+            self.update_social_trust_on_interaction(observer_id, vehicle_id, cooperation_score)
         
         self.logger.debug(f"Trust updated for {vehicle_id} based on cooperation: {node.trust_score:.3f}")
     

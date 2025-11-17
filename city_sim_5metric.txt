@@ -1,0 +1,209 @@
+🗽 Times Square NYC-Style VANET Traffic Simulation �
+======================================================================
+🛣️  Created 97 intersections (highway corridor in middle)
+
+🛣️  HIGHWAY-FOCUSED VANET NETWORK 🛣️
+======================================================================
+  📍 Intersections: 97 (city areas only)
+  🛣️  Roads: 350 road segments
+  🏎️  LONG HIGHWAY CORRIDOR: 4 express lanes (70 mph)
+     - Spans full network width (~3300 pixels)
+     - 6 lanes per direction (12 total)
+  🚗 City streets: 7 rows (35 mph)
+  🎯 Highway exits: 5 on/off ramps
+  🚦 Perimeter highways: 65 mph express ring
+======================================================================
+Initializing 150 vehicles in city network...
+🗳️  Enabling consensus-based cluster head elections...
+   ✓ Initialized consensus with 5 authority nodes
+   ✓ Authorities: v1, v2, v3, v4, v5
+Running city simulation for 120 seconds...
+🗳️  Leader failure detection enabled (co-leader succession)
+
+======================================================================
+🔬 THREE IMPROVEMENTS ACTIVE:
+======================================================================
+✅ Improvement 1: Transparent Trust Calculation
+   Formula: trust = 0.5×historical_avg + 0.5×social_trust
+   Resources: bandwidth (50-150 Mbps) + processing (1-4 GHz)
+
+✅ Improvement 2: True Consensus Voting
+   Scoring: 60% trust + 40% resource (simplified from 5 metrics)
+   Voting: 51% majority required (trust-weighted votes)
+
+✅ Improvement 3: Sleeper Agent Detection
+   Historical: Track trust spikes (>0.3 increase flagged)
+   Penalty: 50% trust reduction + election ban
+======================================================================
+
+   ⚠️  PoA Detection: v0 flagged as malicious (trust: 0.20 → 0.14, cluster votes: 2/2)
+   ⚠️  PoA Detection: v16 flagged as malicious (trust: 0.19 → 0.13, cluster votes: 2/2)
+   ⚠️  PoA Detection: v32 flagged as malicious (trust: 0.20 → 0.14, cluster votes: 5/5)
+   ⚠️  PoA Detection: v40 flagged as malicious (trust: 0.20 → 0.14, cluster votes: 3/3)
+   ⚠️  PoA Detection: v48 flagged as malicious (trust: 0.20 → 0.14, cluster votes: 5/5)
+   ⚠️  PoA Detection: v56 flagged as malicious (trust: 0.20 → 0.14, cluster votes: 7/7)
+   ⚠️  PoA Detection: v80 flagged as malicious (trust: 0.20 → 0.14, cluster votes: 6/6)
+   ⚠️  PoA Detection: v88 flagged as malicious (trust: 0.20 → 0.14, cluster votes: 7/7)
+   ⚠️  PoA Detection: v96 flagged as malicious (trust: 0.20 → 0.14, cluster votes: 2/2)
+   ⚠️  PoA Detection: v104 flagged as malicious (trust: 0.20 → 0.14, cluster votes: 2/2)
+   ⚠️  PoA Detection: v112 flagged as malicious (trust: 0.20 → 0.14, cluster votes: 7/7)
+   ⚠️  PoA Detection: v120 flagged as malicious (trust: 0.20 → 0.14, cluster votes: 3/3)
+   ⚠️  PoA Detection: v128 flagged as malicious (trust: 0.20 → 0.14, cluster votes: 1/1)
+   ⚠️  PoA Detection: v144 flagged as malicious (trust: 0.20 → 0.14, cluster votes: 6/6)
+Progress: 0.0% - Time: 0.0s - Clusters: 0 - Raft: follower
+Progress: 4.2% - Time: 5.0s - Clusters: 0 - Raft: follower
+Progress: 8.3% - Time: 10.0s - Clusters: 17 - Raft: follower
+   📊 Trust Update (v0): Historical=0.934, Social=1.000 → New Trust=0.967
+   📊 Trust Update (v1): Historical=0.967, Social=1.000 → New Trust=0.983
+   📊 Trust Update (v2): Historical=0.965, Social=1.000 → New Trust=0.982
+Progress: 12.5% - Time: 15.0s - Clusters: 16 - Raft: follower
+Progress: 16.7% - Time: 20.0s - Clusters: 16 - Raft: follower
+   📊 Trust Update (v0): Historical=0.923, Social=1.000 → New Trust=0.961
+   📊 Trust Update (v1): Historical=0.956, Social=1.000 → New Trust=0.978
+   📊 Trust Update (v2): Historical=0.954, Social=1.000 → New Trust=0.977
+Progress: 20.8% - Time: 25.0s - Clusters: 15 - Raft: follower
+   🔗  Merged 1 overlapping clusters into cluster_1
+   🔗  Merged 1 overlapping clusters into cluster_7
+   🔗  Merged 1 overlapping clusters into cluster_10
+   🔷  Boundary nodes elected in cluster_0: 2 boundary nodes for 2 neighboring clusters
+   🔷  Boundary nodes elected in cluster_6: 1 boundary nodes for 1 neighboring clusters
+   🔷  Boundary nodes elected in cluster_7: 1 boundary nodes for 1 neighboring clusters
+   🔷  Boundary nodes elected in cluster_25: 1 boundary nodes for 1 neighboring clusters
+   🔷  Boundary nodes elected in cluster_15: 1 boundary nodes for 1 neighboring clusters
+   ⚠️  PoA Detection: v8 flagged as malicious (trust: 0.65 → 0.45, cluster votes: 2/2)
+Progress: 25.0% - Time: 30.0s - Clusters: 14 - Raft: follower
+   📊 Trust Update (v0): Historical=0.917, Social=1.000 → New Trust=0.959
+   📊 Trust Update (v1): Historical=0.950, Social=1.000 → New Trust=0.975
+   📊 Trust Update (v2): Historical=0.949, Social=1.000 → New Trust=0.975
+   ⚠️  Leader failure in cluster_0: v139 (out of range)
+   👔  Co-leader elected: v97 in cluster_0 (score: 0.827)
+   ✅  Co-leader succession: v97 → Leader in cluster_0
+   ⚠️  Leader failure in cluster_1: v139 (out of range)
+   📡  Relay nodes elected in cluster_1: 5 relays for 22 out-of-range members
+   👔  Co-leader elected: v140 in cluster_1 (score: 0.930)
+   ✅  Co-leader succession: v140 → Leader in cluster_1
+   ⚠️  Leader failure in cluster_3: v55 (out of range)
+   👔  Co-leader elected: v36 in cluster_3 (score: 0.857)
+   ✅  Co-leader succession: v36 → Leader in cluster_3
+   ⚠️  Leader failure in cluster_4: v107 (out of range)
+   👔  Co-leader elected: v125 in cluster_4 (score: 0.840)
+   ✅  Co-leader succession: v125 → Leader in cluster_4
+   ⚠️  Leader failure in cluster_17: v59 (out of range)
+   👔  Co-leader elected: v49 in cluster_17 (score: 0.764)
+   ✅  Co-leader succession: v49 → Leader in cluster_17
+   📡  Relay nodes elected in cluster_15: 2 relays for 2 out-of-range members
+   👔  Co-leader elected: v57 in cluster_15 (score: 0.714)
+   👔  Co-leader elected: v140 in cluster_14 (score: 0.761)
+   ⚠️  Leader failure in cluster_3: v148 (out of range)
+   👔  Co-leader elected: v79 in cluster_3 (score: 0.829)
+   ✅  Co-leader succession: v79 → Leader in cluster_3
+   ⚠️  Leader failure in cluster_17: v149 (out of range)
+   👔  Co-leader elected: v134 in cluster_17 (score: 0.750)
+   ✅  Co-leader succession: v134 → Leader in cluster_17
+Progress: 29.2% - Time: 35.0s - Clusters: 11 - Raft: follower
+Progress: 33.3% - Time: 40.0s - Clusters: 11 - Raft: follower
+Progress: 37.5% - Time: 45.0s - Clusters: 11 - Raft: follower
+Progress: 41.7% - Time: 50.0s - Clusters: 10 - Raft: follower
+Progress: 45.8% - Time: 55.0s - Clusters: 8 - Raft: follower
+   🗳️  Cluster cluster_10: Elected v75 via majority consensus
+      📊 5-METRIC BREAKDOWN:
+         • Trust (40%):      0.996
+         • Resource (20%):   0.836
+         • Stability (15%):  0.000
+         • Behavior (15%):   1.000
+         • Centrality (10%): 0.379
+      ➜  COMPOSITE SCORE: 0.753 | Votes: 100.0%
+      ✓  Formula: 0.40×0.996 + 0.20×0.836 + 0.15×0.000 + 0.15×1.000 + 0.10×0.379 = 0.753
+   🔗  Merged 2 overlapping clusters into cluster_0
+   🔗  Merged 1 overlapping clusters into cluster_17
+   ⚠️  Leader failure in cluster_0: v75 (out of range)
+   👔  Co-leader elected: v75 in cluster_0 (score: 0.850)
+   ✅  Co-leader succession: v75 → Leader in cluster_0
+Progress: 50.0% - Time: 60.0s - Clusters: 8 - Raft: follower
+   ⚠️  Leader failure in cluster_0: v60 (out of range)
+   👔  Co-leader elected: v31 in cluster_0 (score: 0.841)
+   ✅  Co-leader succession: v31 → Leader in cluster_0
+   ⚠️  Leader failure in cluster_0: v75 (out of range)
+   📡  Relay nodes elected in cluster_0: 3 relays for 43 out-of-range members
+   👔  Co-leader elected: v75 in cluster_0 (score: 0.842)
+   ✅  Co-leader succession: v75 → Leader in cluster_0
+   ⚠️  Leader failure in cluster_3: v145 (out of range)
+   👔  Co-leader elected: v138 in cluster_3 (score: 0.927)
+   ✅  Co-leader succession: v138 → Leader in cluster_3
+   👔  Co-leader elected: v138 in cluster_7 (score: 0.773)
+   ⚠️  Leader failure in cluster_3: v79 (out of range)
+   📡  Relay nodes elected in cluster_3: 2 relays for 15 out-of-range members
+   👔  Co-leader elected: v10 in cluster_3 (score: 0.910)
+   ✅  Co-leader succession: v10 → Leader in cluster_3
+Progress: 54.2% - Time: 65.0s - Clusters: 6 - Raft: follower
+Progress: 58.3% - Time: 70.0s - Clusters: 5 - Raft: follower
+Progress: 62.5% - Time: 75.0s - Clusters: 5 - Raft: follower
+Progress: 66.7% - Time: 80.0s - Clusters: 5 - Raft: follower
+Progress: 70.8% - Time: 85.0s - Clusters: 4 - Raft: follower
+Progress: 75.0% - Time: 90.0s - Clusters: 3 - Raft: follower
+Progress: 79.2% - Time: 95.0s - Clusters: 4 - Raft: follower
+Progress: 83.3% - Time: 100.0s - Clusters: 4 - Raft: follower
+Progress: 87.5% - Time: 105.0s - Clusters: 4 - Raft: follower
+Progress: 91.7% - Time: 110.0s - Clusters: 4 - Raft: follower
+Progress: 95.8% - Time: 115.0s - Clusters: 4 - Raft: follower
+Progress: 100.0% - Time: 120.0s - Clusters: 3 - Raft: follower
+Simulation complete! Captured 241 frames
+
+======================================================================
+🗳️  CONSENSUS-BASED CLUSTER HEAD ELECTION STATISTICS
+======================================================================
+Algorithm: Hybrid (Raft + PoA)
+Total head elections: 361
+Malicious nodes detected (PoA): 17
+Trust updates: 11
+
+📊 Raft Consensus:
+   State: follower
+   Current term: 0
+   Cluster nodes: 150
+
+🛡️  Proof of Authority (PoA):
+   Active authorities: 133
+   Authority threshold: 0.8 trust score
+
+📈 Trust Distribution:
+   Average trust score: 0.916
+   High trust nodes (>0.7): 133
+   Medium trust (0.4-0.7): 14
+   Low trust nodes (<0.4): 3
+
+🚨 Security:
+   Known malicious: 17
+   Flagged by PoA: 17
+   Detection rate: 100.0%
+
+📡 V2V Communication:
+   Total messages: 10841
+   Collision warnings: 3196
+   Lane change alerts: 1980
+   Emergency alerts: 1932
+   Brake warnings: 1077
+   Traffic jam alerts: 2656
+   Communication range: 250 pixels
+
+🔁 Multi-Hop Relay System:
+   Total relay nodes: 3
+   Relayed messages: 451
+   Relay hops: 788
+   Average hops per relayed message: 1.75
+
+🔷 Inter-Cluster Boundary Nodes:
+   Total boundary nodes: 0
+   Clusters with boundary nodes: 0
+   Inter-cluster messages: 12
+======================================================================
+
+✅ Animation data exported to: city_animation_data.json
+📊 Total frames: 241
+⏱️  Duration: 120s
+🚦 Intersections: 97
+🛣️  Roads: 350
+
+✅ HTML file will be: city_traffic_animation.html
+
+✅ Done! Now open city_traffic_animation.html to see Times Square traffic!

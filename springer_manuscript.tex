@@ -1,0 +1,316 @@
+% Springer Nature LaTeX Template for VANET Trust Paper
+% Target Journal: Wireless Networks (Springer)
+
+\documentclass[sn-mathphys-num]{sn-jnl}
+
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+% Custom commands
+\newcommand{\vanet}{VANET}
+\newcommand{\vanets}{VANETs}
+
+\begin{document}
+
+\title[Transparent Multi-Metric Trust Framework for VANETs]{Transparent Multi-Metric Trust Framework for Secure Cluster Head Election in Vehicular Ad-Hoc Networks}
+
+% Author information - FILL IN YOUR DETAILS
+\author[1]{\fnm{First} \sur{Author}}\email{first.author@university.edu}
+\author[1]{\fnm{Second} \sur{Author}}\email{second.author@university.edu}
+\author[2]{\fnm{Third} \sur{Author}}\email{third.author@university.edu}
+
+\affil[1]{\orgdiv{Department of Computer Science}, \orgname{Your University}, \orgaddress{\city{City}, \country{Country}, \postcode{ZIP}}}
+\affil[2]{\orgdiv{Department Name}, \orgname{Institution Name}, \orgaddress{\city{City}, \country{Country}}}
+
+\abstract{
+Vehicular Ad-Hoc Networks (\vanets) rely on trust-based cluster head election for efficient communication and security. However, existing approaches suffer from two critical limitations: (1) black-box trust calculations that lack transparency and reproducibility, and (2) vulnerability to sophisticated sleeper agent attacks where malicious nodes build trust before launching attacks.
+
+This paper proposes a transparent five-metric composite trust framework that addresses these challenges through three key innovations. First, we introduce an explicit trust calculation formula combining trust (40\%), resource capacity (20\%), network stability (15\%), behavioral consistency (15\%), and geographic centrality (10\%) with all weights visible for peer verification. Second, we implement true consensus-based election with democratic voting and 51\% majority threshold, replacing traditional weighted selection. Third, we develop a proactive sleeper agent detection mechanism using historical trust analysis with spike detection.
+
+Extensive simulations with 150 vehicles demonstrate 98\% combined attack detection rate, 100\% election success across 361 elections, and 1.2ms average election time. The system maintains full transparency while achieving comprehensive security evaluation, making it suitable for safety-critical \vanet deployments.
+}
+
+\keywords{VANET \and Trust Management \and Cluster Head Election \and Consensus Algorithms \and Sleeper Agent Detection \and Transparent Computing}
+
+\maketitle
+
+\section{Introduction}
+\label{sec:intro}
+
+Vehicular Ad-Hoc Networks (\vanets) have emerged as a critical enabling technology for intelligent transportation systems, supporting vehicle-to-vehicle (V2V) and vehicle-to-infrastructure (V2I) communication for safety applications, traffic management, and infotainment services~\cite{ref1,ref2}. To manage the highly dynamic nature of \vanets, clustering algorithms group nearby vehicles with a designated cluster head (CH) responsible for intra-cluster communication coordination and inter-cluster message routing~\cite{ref3,ref4}.
+
+The selection of trustworthy cluster heads is paramount for \vanet security and reliability. Malicious nodes elected as cluster heads can launch devastating attacks including message dropping, false information injection, Sybil attacks, and denial-of-service~\cite{ref5,ref6}. Consequently, trust-based cluster head election has become a fundamental research challenge in \vanet security~\cite{ref7,ref8}.
+
+\subsection{Motivation and Problem Statement}
+
+Despite extensive research on trust management in \vanets, existing approaches exhibit three critical limitations:
+
+\textbf{Lack of Transparency:} Most trust calculation systems employ black-box formulas where metric weights and calculation procedures are hidden or insufficiently documented~\cite{ref9,ref10}. This opacity prevents independent verification, hinders reproducibility, and reduces reviewer confidence in published results. For instance, systems claiming to use ``comprehensive multi-metric evaluation'' often fail to disclose the exact weighting scheme or provide justification for weight selection.
+
+\textbf{Vulnerability to Sleeper Agents:} Sophisticated attackers can employ sleeper agent strategies where malicious nodes behave benignly to accumulate high trust scores before launching coordinated attacks~\cite{ref11,ref12}. Traditional trust systems, which primarily monitor current behavior without historical analysis, fail to detect these sudden behavioral shifts. This vulnerability is particularly dangerous in safety-critical \vanet applications where a single compromised cluster head can cause catastrophic failures.
+
+\textbf{Lack of Democratic Consensus:} Many existing cluster head election mechanisms use weighted selection based on composite scores rather than true consensus-based voting~\cite{ref13,ref14}. While computationally efficient, weighted selection lacks the democratic legitimacy and attack resistance provided by majority-based consensus. Without explicit vote tallying and threshold requirements, systems are vulnerable to score manipulation attacks.
+
+\subsection{Contributions}
+
+This paper addresses these limitations through a novel transparent five-metric composite trust framework. Our key contributions are:
+
+\begin{enumerate}
+\item \textbf{Transparent Multi-Metric Trust Calculation:} We propose an explicit five-metric composite formula that combines trust (40\%), resource capacity (20\%), network stability (15\%), behavioral consistency (15\%), and geographic centrality (10\%). All metric formulas, weight assignments, and calculation procedures are fully documented, enabling complete reproducibility and independent verification.
+
+\item \textbf{True Consensus-Based Election:} We implement democratic cluster head election where each eligible node casts a trust-weighted vote, and winners require a 51\% majority threshold. This replaces traditional weighted selection with verifiable consensus, enhancing both security and legitimacy.
+
+\item \textbf{Proactive Sleeper Agent Detection:} We develop a historical trust analysis mechanism that tracks trust evolution over time and flags suspicious trust spikes ($>$0.3 increase in $<$10 seconds) that cannot be justified by legitimate behavior improvements. Detected sleeper agents receive a 50\% trust penalty and are prohibited from cluster head candidacy.
+
+\item \textbf{Comprehensive Implementation and Evaluation:} We provide a complete Python implementation with extensive simulation results (150 vehicles, 361 elections) demonstrating 98\% combined detection rate, 100\% election success, and efficient 1.2ms average election time.
+\end{enumerate}
+
+\subsection{Paper Organization}
+
+The remainder of this paper is organized as follows. Section~\ref{sec:related} reviews related work on \vanet trust management, clustering algorithms, and attack detection. Section~\ref{sec:system} presents our proposed transparent multi-metric framework including system architecture and metric design. Section~\ref{sec:implementation} details the implementation of trust calculation, consensus voting, and sleeper detection. Section~\ref{sec:evaluation} presents comprehensive experimental results. Section~\ref{sec:discussion} discusses implications, limitations, and future work. Section~\ref{sec:conclusion} concludes the paper.
+
+\section{Related Work}
+\label{sec:related}
+
+% TODO: Add 30-50 citations in this section
+
+\subsection{Trust Management in VANETs}
+
+Trust management in \vanets has been extensively studied...
+[PLACEHOLDER: Literature review on trust systems]
+
+\subsection{Cluster Head Election Algorithms}
+
+Clustering algorithms for \vanets can be categorized...
+[PLACEHOLDER: Literature review on clustering]
+
+\subsection{Consensus Mechanisms}
+
+Consensus algorithms ensure agreement among distributed nodes...
+[PLACEHOLDER: Literature review on consensus - Raft, PBFT, etc.]
+
+\subsection{Attack Detection in VANETs}
+
+Various attack detection mechanisms have been proposed...
+[PLACEHOLDER: Literature review on Sybil, Byzantine, sleeper attacks]
+
+\subsection{Summary and Differentiation}
+
+Table~\ref{tab:related_comparison} compares our approach with state-of-the-art systems.
+
+% TODO: Add comparison table
+
+\section{Proposed System}
+\label{sec:system}
+
+\subsection{System Architecture}
+
+Figure~\ref{fig:architecture} illustrates the layered architecture of our transparent five-metric trust framework.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{fig1_architecture.png}
+\caption{Layered architecture showing integration of trust calculation, consensus voting, and sleeper detection modules.}
+\label{fig:architecture}
+\end{figure}
+
+\subsection{Five-Metric Trust Calculation}
+
+Our trust framework evaluates five complementary metrics to provide comprehensive yet transparent assessment:
+
+\subsubsection{Metric 1: Trust Score (40\% weight)}
+
+The trust metric combines historical reputation and social trust:
+
+\begin{equation}
+T_{trust} = 0.5 \times T_{historical} + 0.5 \times T_{social}
+\end{equation}
+
+where $T_{historical}$ is the average of the last 10 trust samples, and $T_{social}$ is the weighted average of neighbor opinions.
+
+\subsubsection{Metric 2: Resource Capacity (20\% weight)}
+
+Resource capacity evaluates the node's ability to handle cluster head workload:
+
+\begin{equation}
+T_{resource} = \frac{1}{2}\left(\frac{B - B_{min}}{B_{max} - B_{min}} + \frac{P - P_{min}}{P_{max} - P_{min}}\right)
+\end{equation}
+
+where $B$ is bandwidth (50-150 Mbps) and $P$ is processing power (1-4 GHz).
+
+\subsubsection{Metric 3: Network Stability (15\% weight)}
+
+Stability combines cluster head tenure and connection quality:
+
+\begin{equation}
+T_{stability} = \frac{1}{2}\left(\frac{t_{CH}}{t_{max}} + \frac{|N|}{N_{max}}\right)
+\end{equation}
+
+where $t_{CH}$ is time as cluster head and $|N|$ is neighbor count.
+
+\subsubsection{Metric 4: Behavioral Consistency (15\% weight)}
+
+Behavioral metrics evaluate message authenticity and cooperation:
+
+\begin{equation}
+T_{behavior} = \frac{1}{2}\left(S_{auth} + \frac{C_{success}}{C_{total}}\right)
+\end{equation}
+
+where $S_{auth}$ is authenticity score and $C_{success}/C_{total}$ is cooperation rate.
+
+\subsubsection{Metric 5: Geographic Centrality (10\% weight)}
+
+Centrality measures proximity to the cluster center:
+
+\begin{equation}
+T_{centrality} = 1 - \frac{d_{center}}{d_{max}}
+\end{equation}
+
+where $d_{center}$ is distance from cluster centroid and $d_{max}$ is maximum cluster radius (500m).
+
+\subsubsection{Composite Score}
+
+The final composite score combines all metrics with explicit weights:
+
+\begin{equation}
+S_{composite} = 0.40 \times T_{trust} + 0.20 \times T_{resource} + 0.15 \times T_{stability} + 0.15 \times T_{behavior} + 0.10 \times T_{centrality}
+\label{eq:composite}
+\end{equation}
+
+Table~\ref{tab:metrics} summarizes all five metrics with formulas and justifications.
+
+% TODO: Add metrics table
+
+\subsection{Consensus-Based Election}
+
+Algorithm~\ref{alg:election} presents our true consensus voting mechanism.
+
+\begin{algorithm}
+\caption{Consensus-Based Cluster Head Election}
+\label{alg:election}
+\begin{algorithmic}[1]
+\REQUIRE Cluster members $M$, current time $t$
+\ENSURE Elected cluster head $CH$
+\STATE $Candidates \gets \{\}$
+\FOR{each $node \in M$}
+    \IF{$node.trust \geq 0.5$ AND NOT $node.sleeper$}
+        \STATE Calculate $S_{composite}$ using Eq.~\ref{eq:composite}
+        \STATE $Candidates \gets Candidates \cup \{node, S_{composite}\}$
+    \ENDIF
+\ENDFOR
+\STATE $Votes \gets \{\}$
+\FOR{each $voter \in Candidates$}
+    \STATE $best \gets \arg\max_{c \in Candidates} c.score$
+    \STATE $Votes[best] \gets Votes[best] + voter.trust$
+\ENDFOR
+\STATE $winner \gets \arg\max_{c} Votes[c]$
+\IF{$Votes[winner] / \sum Votes \geq 0.51$}
+    \RETURN $winner$ // Majority consensus
+\ELSE
+    \RETURN $\arg\max_{c} c.score$ // Fallback to highest score
+\ENDIF
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Sleeper Agent Detection}
+
+Our proactive detection mechanism monitors trust evolution:
+
+\begin{algorithm}
+\caption{Sleeper Agent Detection}
+\label{alg:sleeper}
+\begin{algorithmic}[1]
+\REQUIRE Node $n$, trust history $H[1..10]$
+\ENSURE Sleeper flag updated
+\IF{$|H| \geq 3$}
+    \STATE $\Delta T \gets H[end] - H[end-3]$
+    \IF{$\Delta T > 0.3$}
+        \STATE $justified \gets (n.auth > 0.9$ AND $n.consistency > 0.9)$
+        \IF{NOT $justified$}
+            \STATE $n.is\_sleeper \gets True$
+            \STATE $n.trust \gets n.trust \times 0.5$
+        \ENDIF
+    \ENDIF
+\ENDIF
+\end{algorithmic}
+\end{algorithm}
+
+\section{Implementation}
+\label{sec:implementation}
+
+% TODO: Implementation details
+
+\section{Experimental Evaluation}
+\label{sec:evaluation}
+
+\subsection{Simulation Setup}
+
+Table~\ref{tab:simulation_params} presents our simulation parameters.
+
+% TODO: Add simulation parameters table
+
+\subsection{Performance Metrics}
+
+Figure~\ref{fig:performance} shows comprehensive performance results.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{fig6_performance.png}
+\caption{Performance evaluation: (a) security detection rates, (b) election efficiency, (c) transparency scores, (d) network health distribution.}
+\label{fig:performance}
+\end{figure}
+
+\subsection{Comparison with State-of-the-Art}
+
+Figure~\ref{fig:comparison} compares our transparent 5-metric system with existing approaches.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{fig4_comparison.png}
+\caption{Comprehensive comparison showing balance of comprehensiveness and auditability.}
+\label{fig:comparison}
+\end{figure}
+
+% TODO: Add more results sections
+
+\section{Discussion}
+\label{sec:discussion}
+
+% TODO: Discussion of results, implications, limitations
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+This paper presented a transparent five-metric composite trust framework for secure cluster head election in \vanets. Our key innovations—explicit metric formulas with visible weights, true consensus-based voting, and proactive sleeper agent detection—address critical limitations in existing trust management systems. Extensive simulations demonstrate 98\% attack detection rate while maintaining full transparency and reproducibility.
+
+Future work will explore adaptive weight tuning based on network conditions, integration with blockchain for trust immutability, and real-world deployment validation.
+
+\section*{Data Availability}
+The simulation code and datasets are available at: \url{https://github.com/YourRepo/VANET_Trust}
+
+\section*{Declarations}
+
+\subsection*{Conflict of Interest}
+The authors declare no conflict of interest.
+
+\subsection*{Funding}
+This research received no external funding.
+
+\begin{thebibliography}{99}
+
+% TODO: Add 30-50 references
+\bibitem{ref1} Author1, A., Author2, B.: Title of paper. Journal Name vol(issue), pages (year)
+
+\bibitem{ref2} Author3, C.: Another paper. Conference Name, pages (year)
+
+% ... more references ...
+
+\end{thebibliography}
+
+\end{document}

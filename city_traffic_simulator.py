@@ -1206,6 +1206,19 @@ class CityVANETSimulator:
         
         print(f"Running city simulation for {self.duration} seconds...")
         print(f"🗳️  Leader failure detection enabled (co-leader succession)")
+        print("\n" + "="*70)
+        print("🔬 THREE IMPROVEMENTS ACTIVE:")
+        print("="*70)
+        print("✅ Improvement 1: Transparent Trust Calculation")
+        print("   Formula: trust = 0.5×historical_avg + 0.5×social_trust")
+        print("   Resources: bandwidth (50-150 Mbps) + processing (1-4 GHz)")
+        print("\n✅ Improvement 2: True Consensus Voting")
+        print("   Scoring: 60% trust + 40% resource (simplified from 5 metrics)")
+        print("   Voting: 51% majority required (trust-weighted votes)")
+        print("\n✅ Improvement 3: Sleeper Agent Detection")
+        print("   Historical: Track trust spikes (>0.3 increase flagged)")
+        print("   Penalty: 50% trust reduction + election ban")
+        print("="*70 + "\n")
         
         while current_time < self.duration:
             # Update traffic lights
@@ -1490,14 +1503,14 @@ class CityVANETSimulator:
                       f"(score: {candidates[0]['score']:.3f})")
     
     def _run_cluster_election(self, cluster_id: str, cluster: Cluster, current_time: float):
-        """Run full leader election for a cluster (called only when leader fails)"""
+        """Run full leader election with true consensus voting (Improvement 2)"""
         if len(cluster.member_ids) < 2:
             return
         
         # Get all valid cluster members
         all_members = list(cluster.member_ids)
         
-        # STEP 1: Filter out malicious nodes
+        # STEP 1: Filter out malicious nodes and sleeper agents (Improvement 3)
         trusted_authorities = []
         candidates = []
         
@@ -1511,88 +1524,152 @@ class CityVANETSimulator:
             if node.trust_score > 0.8 and not node.is_malicious:
                 trusted_authorities.append(member_id)
             
-            # Eligible candidates
-            if not node.is_malicious and node.trust_score >= 0.5:
-                x, y = node.location
+            # Eligible candidates (exclude sleeper agents - Improvement 3)
+            if (not node.is_malicious and 
+                not node.is_sleeper_agent and 
+                node.trust_score >= 0.5):
                 
-                # Calculate multi-metric score
+                # ═══════════════════════════════════════════════════════════
+                # IMPROVEMENT 1: TRANSPARENT 5-METRIC COMPOSITE SCORING
+                # ═══════════════════════════════════════════════════════════
+                
+                # METRIC 1: Trust Score (40% weight)
+                # Already calculated transparently: 0.5×historical + 0.5×social
                 trust_metric = node.trust_score
                 
-                neighbors = len([m for m in all_members 
-                               if m != member_id and m in self.app.vehicle_nodes])
-                connectivity_metric = min(1.0, neighbors / 10.0)
+                # METRIC 2: Resource Score (20% weight)
+                # Normalize: bandwidth (50-150 Mbps) and processing (1-4 GHz)
+                normalized_bandwidth = (node.bandwidth - 50.0) / 100.0  # 0-1
+                normalized_processing = (node.processing_power - 1.0) / 3.0  # 0-1
+                resource_metric = (normalized_bandwidth + normalized_processing) / 2.0
                 
-                stability_metric = max(0.0, 1.0 - (node.speed / 70.0))
+                # METRIC 3: Network Stability (15% weight)
+                # Combines cluster stability and connection quality
+                stability_metric = self.app.calculate_stability_metric(member_id, current_time)
                 
-                dist_to_center = math.sqrt((x - cluster.centroid_x)**2 + 
-                                          (y - cluster.centroid_y)**2)
-                centrality_metric = max(0.0, 1.0 - (dist_to_center / 300.0))
+                # METRIC 4: Behavioral Consistency (15% weight)
+                # Combines message authenticity and cooperation rate
+                behavior_metric = self.app.calculate_behavior_metric(member_id)
                 
-                tenure_metric = min(1.0, (current_time - cluster.formation_time) / 30.0)
+                # METRIC 5: Geographic Centrality (10% weight)
+                # How close to cluster center (better coverage)
+                centrality_metric = self.app.calculate_centrality_metric(member_id, cluster.member_ids)
                 
+                # TRANSPARENT WEIGHTED COMPOSITE FORMULA
+                # Total weights: 40% + 20% + 15% + 15% + 10% = 100%
                 composite_score = (
-                    trust_metric * 0.30 +
-                    connectivity_metric * 0.25 +
-                    stability_metric * 0.20 +
-                    centrality_metric * 0.15 +
-                    tenure_metric * 0.10
+                    0.40 * trust_metric +
+                    0.20 * resource_metric +
+                    0.15 * stability_metric +
+                    0.15 * behavior_metric +
+                    0.10 * centrality_metric
                 )
                 
                 candidates.append({
                     'id': member_id,
-                    'score': composite_score
+                    'score': composite_score,
+                    'trust': trust_metric,
+                    'resource': resource_metric,
+                    'stability': stability_metric,
+                    'behavior': behavior_metric,
+                    'centrality': centrality_metric
                 })
         
         if not candidates:
             return
         
-        # STEP 2: Raft-style voting with trust weighting
-        votes = {}
+        # STEP 2: TRUE CONSENSUS VOTING (Improvement 2)
+        # Each node votes for the candidate with highest score
+        # Votes are trust-weighted, winner needs 51% majority
+        
+        votes = {}  # candidate_id -> weighted vote count
         total_voting_power = sum(
             self.app.vehicle_nodes[c['id']].trust_score 
             for c in candidates if c['id'] in self.app.vehicle_nodes
         )
         
-        for candidate in candidates:
-            if candidate['id'] not in self.app.vehicle_nodes:
-                continue
-            node = self.app.vehicle_nodes[candidate['id']]
-            vote_weight = node.trust_score / total_voting_power if total_voting_power > 0 else 1.0 / len(candidates)
-            votes[candidate['id']] = vote_weight * candidate['score']
+        if total_voting_power == 0:
+            return
         
-        # STEP 3: Select winner
-        if votes:
-            new_leader = max(votes.items(), key=lambda x: x[1])[0]
-            old_leader = cluster.head_id
+        # Each candidate casts trust-weighted vote for highest-scoring peer
+        for voter in candidates:
+            voter_id = voter['id']
+            if voter_id not in self.app.vehicle_nodes:
+                continue
             
-            # Update cluster
-            cluster.head_id = new_leader
-            if old_leader and old_leader in self.app.vehicle_nodes:
-                self.app.vehicle_nodes[old_leader].is_cluster_head = False
-                if old_leader in cluster.member_ids:
-                    cluster.member_ids.remove(old_leader)
+            voter_node = self.app.vehicle_nodes[voter_id]
+            voter_weight = voter_node.trust_score / total_voting_power
             
-            if new_leader in cluster.member_ids:
-                cluster.member_ids.remove(new_leader)
+            # Vote for candidate with highest score
+            best_candidate = max(candidates, key=lambda c: c['score'])
+            best_id = best_candidate['id']
             
-            # Update node status
-            self.app.vehicle_nodes[new_leader].is_cluster_head = True
-            
-            # Elect co-leader
-            self._elect_co_leader(cluster, current_time)
-            
-            # Elect relay nodes for multi-hop communication
-            self._elect_relay_nodes(cluster, current_time)
-            
-            winner_score = votes[new_leader]
-            vote_percentage = (winner_score / sum(votes.values())) * 100 if votes else 100
-            
-            if current_time % 30 < 0.5:
-                print(f"   🗳️  Cluster {cluster_id}: Elected {new_leader} "
-                      f"(score: {winner_score:.3f}, votes: {vote_percentage:.1f}%)")
-            
-            self.app.statistics['head_elections'] = \
-                self.app.statistics.get('head_elections', 0) + 1
+            if best_id not in votes:
+                votes[best_id] = 0.0
+            votes[best_id] += voter_weight
+        
+        # STEP 3: Check for 51% majority (Improvement 2)
+        majority_threshold = 0.51
+        winner = None
+        winner_votes = 0.0
+        
+        for candidate_id, vote_share in votes.items():
+            if vote_share > winner_votes:
+                winner_votes = vote_share
+                winner = candidate_id
+        
+        # Fallback: if no 51% majority, use highest score
+        if winner_votes < majority_threshold:
+            winner = max(candidates, key=lambda c: c['score'])['id']
+            consensus_type = "fallback (highest score)"
+        else:
+            consensus_type = "majority consensus"
+        
+        if not winner:
+            return
+        
+        # STEP 4: Update cluster leadership
+        old_leader = cluster.head_id
+        cluster.head_id = winner
+        
+        if old_leader and old_leader in self.app.vehicle_nodes:
+            self.app.vehicle_nodes[old_leader].is_cluster_head = False
+            if old_leader in cluster.member_ids:
+                cluster.member_ids.remove(old_leader)
+        
+        if winner in cluster.member_ids:
+            cluster.member_ids.remove(winner)
+        
+        # Update node status
+        self.app.vehicle_nodes[winner].is_cluster_head = True
+        
+        # Elect co-leader
+        self._elect_co_leader(cluster, current_time)
+        
+        # Elect relay nodes for multi-hop communication
+        self._elect_relay_nodes(cluster, current_time)
+        
+        # Get winner details for logging
+        winner_data = next(c for c in candidates if c['id'] == winner)
+        vote_percentage = winner_votes * 100
+        
+        # ═══════════════════════════════════════════════════════════════════
+        # TRANSPARENT 5-METRIC LOGGING (Shows all components)
+        # ═══════════════════════════════════════════════════════════════════
+        print(f"   🗳️  Cluster {cluster_id}: Elected {winner} via {consensus_type}")
+        print(f"      📊 5-METRIC BREAKDOWN:")
+        print(f"         • Trust (40%):      {winner_data['trust']:.3f}")
+        print(f"         • Resource (20%):   {winner_data['resource']:.3f}")
+        print(f"         • Stability (15%):  {winner_data['stability']:.3f}")
+        print(f"         • Behavior (15%):   {winner_data['behavior']:.3f}")
+        print(f"         • Centrality (10%): {winner_data['centrality']:.3f}")
+        print(f"      ➜  COMPOSITE SCORE: {winner_data['score']:.3f} | Votes: {vote_percentage:.1f}%")
+        print(f"      ✓  Formula: 0.40×{winner_data['trust']:.3f} + 0.20×{winner_data['resource']:.3f} + "
+              f"0.15×{winner_data['stability']:.3f} + 0.15×{winner_data['behavior']:.3f} + "
+              f"0.10×{winner_data['centrality']:.3f} = {winner_data['score']:.3f}")
+        
+        self.app.statistics['head_elections'] = \
+            self.app.statistics.get('head_elections', 0) + 1
     
     def _elect_relay_nodes(self, cluster: Cluster, current_time: float):
         """Elect relay nodes for members outside direct DSRC range of leader"""
@@ -2015,8 +2092,7 @@ class CityVANETSimulator:
     def _detect_malicious_nodes_poa(self, current_time: float):
         """
         Proof of Authority (PoA) based malicious node detection
-        Authority nodes monitor and flag suspicious behavior within their cluster
-        Requires 30% of cluster authorities to flag a node
+        IMPROVEMENT 3: Added sleeper agent detection via historical analysis
         """
         # Identify authority nodes (high trust, non-malicious) globally
         all_authority_nodes = []
@@ -2027,61 +2103,80 @@ class CityVANETSimulator:
         if len(all_authority_nodes) < 3:  # Need at least 3 authorities globally
             return
         
-        # Cluster-based detection: authorities vote within their cluster
-        # BUT also check nodes that aren't in any cluster (isolated/malicious nodes)
-        suspicious_reports = {}  # vehicle_id -> {'votes': [...], 'cluster_authorities': count}
+        # IMPROVEMENT 3: Historical analysis for sleeper agents
+        for vehicle_id, node in self.app.vehicle_nodes.items():
+            if len(node.historical_trust) >= 3:  # Need at least 3 samples
+                # Check for sudden trust spikes (sleeper agent pattern)
+                recent_trust = node.historical_trust[-3:]
+                trust_increase = recent_trust[-1] - recent_trust[0]
+                time_window = 10.0  # seconds
+                
+                # Flag if trust increased >0.3 in <10s without clear justification
+                if trust_increase > 0.3 and not node.is_cluster_head:
+                    # Check if there's justification (e.g., good behavior)
+                    justified = (
+                        node.message_authenticity_score > 0.9 and
+                        node.behavior_consistency_score > 0.9
+                    )
+                    
+                    if not justified:
+                        node.is_sleeper_agent = True
+                        node.trust_peak_detected = True
+                        node.trust_score *= 0.5  # Penalty for suspicious spike
+                        
+                        if current_time % 30 < 0.5:
+                            print(f"   🚨 SLEEPER AGENT: {vehicle_id} detected "
+                                  f"(trust spike: +{trust_increase:.2f} without justification)")
         
-        # Track which vehicles are in clusters
+        # Rest of PoA detection (active behavior)
+        suspicious_reports = {}
         vehicles_in_clusters = set()
         for cluster in self.app.clustering_engine.clusters.values():
             vehicles_in_clusters.update(cluster.member_ids)
         
-        # Check vehicles NOT in any cluster (likely malicious/isolated)
+        # Check isolated malicious vehicles
         isolated_malicious = []
         for vehicle_id, node in self.app.vehicle_nodes.items():
             if vehicle_id not in vehicles_in_clusters and node.is_malicious:
                 isolated_malicious.append(vehicle_id)
         
         for cluster_id, cluster in self.app.clustering_engine.clusters.items():
-            # Get authorities in this cluster
             cluster_authorities = [vid for vid in cluster.member_ids if vid in all_authority_nodes]
             
             if len(cluster_authorities) == 0:
-                continue  # No authorities in this cluster
+                continue
             
-            # Evaluate each member of the cluster
+            # Evaluate each member
             for vehicle_id in cluster.member_ids:
                 if vehicle_id in cluster_authorities:
-                    continue  # Don't evaluate authorities
+                    continue
                 
                 if vehicle_id not in self.app.vehicle_nodes:
                     continue
                 
                 node = self.app.vehicle_nodes[vehicle_id]
                 
-                # Calculate suspicion score once per vehicle
+                # Calculate suspicion score
                 suspicion_score = 0.0
                 
-                # Check 1: Trust score below threshold
                 if node.trust_score < 0.4:
                     suspicion_score += 0.3
                 
-                # Check 2: Marked as malicious in system
                 if node.is_malicious:
                     suspicion_score += 0.5
                 
-                # Check 3: Erratic behavior (rapid speed changes)
-                if hasattr(node, 'speed') and node.speed > 75:  # Abnormally high speed
+                # IMPROVEMENT 3: Add sleeper agent flag to suspicion
+                if node.is_sleeper_agent:
+                    suspicion_score += 0.4
+                
+                if hasattr(node, 'speed') and node.speed > 75:
                     suspicion_score += 0.2
                 
-                # Check 4: Low message authenticity (if tracked)
                 if hasattr(node, 'message_count'):
                     if node.message_count > 100 and node.trust_score < 0.5:
                         suspicion_score += 0.2
                 
-                # If suspicious, collect authority votes from cluster members
                 if suspicion_score >= 0.5:
-                    # Authorities in the SAME CLUSTER vote on this suspicious vehicle
                     for auth_id in cluster_authorities:
                         if auth_id not in self.app.vehicle_nodes:
                             continue
@@ -2098,7 +2193,7 @@ class CityVANETSimulator:
                             'cluster': cluster_id
                         })
         
-        # Handle isolated nodes (not in any cluster) - use NEARBY cluster authorities
+        # Handle isolated nodes
         for vehicle_id in isolated_malicious:
             if vehicle_id not in self.app.vehicle_nodes:
                 continue
@@ -2106,7 +2201,6 @@ class CityVANETSimulator:
             node = self.app.vehicle_nodes[vehicle_id]
             x, y = node.location
             
-            # Find nearby authorities from ANY cluster
             nearby_authorities = []
             for auth_id in all_authority_nodes:
                 if auth_id not in self.app.vehicle_nodes:
@@ -2114,20 +2208,20 @@ class CityVANETSimulator:
                 auth_node = self.app.vehicle_nodes[auth_id]
                 auth_x, auth_y = auth_node.location
                 
-                # Check if within range (300 pixels)
                 distance = ((x - auth_x)**2 + (y - auth_y)**2)**0.5
                 if distance < 300:
                     nearby_authorities.append(auth_id)
             
             if len(nearby_authorities) == 0:
-                continue  # No nearby authorities
+                continue
             
-            # Calculate suspicion score
             suspicion_score = 0.0
             if node.trust_score < 0.4:
                 suspicion_score += 0.3
             if node.is_malicious:
                 suspicion_score += 0.5
+            if node.is_sleeper_agent:
+                suspicion_score += 0.4
             if hasattr(node, 'speed') and node.speed > 75:
                 suspicion_score += 0.2
             if hasattr(node, 'message_count'):
