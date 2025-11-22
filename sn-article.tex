@@ -8,8 +8,12 @@
 %%                                                                 %%
 %% All additional figures and files should be attached             %%
 %% separately and not embedded in the \TeX\ document itself.       %%
-%%                                                                 %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%                                                                 \begin{figure}[h]
+\centering
+\includegraphics[width=0.9\textwidth]{graph8_improvements_summary.png}
+\caption{Comprehensive summary of the four major improvements achieved by our transparent 5-metric framework compared to baseline approaches: (a) 98\% combined attack detection rate (13\% improvement over single-layer baselines), (b) 1.2ms average election time with only 0.1ms transparency overhead, (c) 100\% formula transparency with all metrics and weights explicitly documented, and (d) 65\% reduction in full election frequency through the HA co-leader mechanism. Each panel demonstrates quantifiable advances in security, efficiency, transparency, and stability—the four pillars of our contribution.}
+\label{fig:improvements_summary}
+\end{figure}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%\documentclass[referee,sn-basic]{sn-jnl}% referee option is meant for double line spacing
 
@@ -484,22 +488,6 @@ Every election logs the complete breakdown in real-time:
 \end{verbatim}
 
 This transparent logging enables independent verification of all election results and ensures reproducibility—a critical requirement for peer review and deployment in safety-critical applications.
-\begin{itemize}
-    \item \textbf{Scenario 1: Active Attackers:} 12\% of nodes are designated as *active attackers* (erratic speed, message spam).
-    \item \textbf{Scenario 2: Sleeper Agents:} 10\% of nodes act as *sleeper agents*, behaving well for 60s before attempting to win an election.
-    \item \textbf{Scenario 3: Leader Failure:} A non-malicious leader is forced to leave its cluster (drives out of range).
-\end{itemize}
-
-\subsection{Performance Metrics}\label{subsec4_3}
-(Your text here... List your metrics: Detection Rate, Total Re-Elections, and Leader Recovery Time.)
-
-\subsection{Performance Metrics}\label{subsec4_3}
-We measure the framework's success using the following metrics:
-\begin{itemize}
-    \item \textbf{Security (Detection Rate \%):} The percentage of "Active Attackers" and "Sleeper Agents" successfully identified and flagged by our two-layer security model.
-    \item \textbf{Stability (Total Re-Elections):} The total number of full, cluster-wide re-elections triggered during the simulation. A lower number indicates higher network stability.
-    \item \textbf{Availability (Leader Recovery Time):} The time (in ms) from a leader's failure (Scenario 3) to the successful promotion of the co-leader. A lower time indicates higher availability.
-\end{itemize}
 
 \section{Results and Analysis}\label{sec5}
 We conducted extensive simulations to evaluate our transparent five-metric framework against three attack scenarios. Table \ref{tab:results_summary} presents the comprehensive performance results.
@@ -554,7 +542,7 @@ Our two-layer security model (proactive PoA + reactive sleeper detection) demons
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.9\textwidth]{graph4_performance_comparison.png}
-\caption{Performance comparison of detection rates across three models: (a) PoA-Only (85\%), (b) Reactive-Only (87\%), (c) Our Combined Model (98\%). The two-layer approach significantly outperforms single-layer baselines.}\label{fig:detection_comparison}
+\caption{Security performance comparison of detection rates across three approaches: PoA-Only (85\%), Reactive-Only (87\%), and Our Combined Two-Layer Model (98\%). The synthesis of proactive PoA consensus with reactive sleeper detection achieves significantly higher detection rates than single-layer baselines, demonstrating the necessity of multi-layer security architecture.}\label{fig:detection_comparison}
 \end{figure}
 
 \subsection{Transparency and Reproducibility}\label{subsec5_2}
@@ -578,13 +566,19 @@ This complete formula breakdown enables independent verification and addresses t
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.9\textwidth]{graph1_trust_transparency.png}
-\caption{Trust calculation transparency comparison: (a) Black-box system with hidden formulas, (b) Our transparent 5-metric system showing all calculations explicitly. Every metric's contribution is visible and verifiable.}\label{fig:transparency}
+\caption{Trust transparency comparison between Mahmood et al.'s 2-metric system (60\% Trust + 40\% Resources) and our comprehensive 5-metric transparent system (40\% Trust + 20\% Resource + 15\% Stability + 15\% Behavior + 10\% Centrality). Our system expands coverage from 2 to 5 dimensions while maintaining 100\% formula transparency for all calculations.}\label{fig:transparency}
 \end{figure}
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.9\textwidth]{graph2_election_mechanism.png}
-\caption{Complete election mechanism flowchart showing the transparent 5-metric calculation process with explicit weights (40-20-15-15-10) and security layer integration (PoA + Sleeper Detection).}\label{fig:election_mechanism}
+\caption{Our transparent 5-metric election system showing the weight distribution: Trust (40\%), Resource (20\%), Stability (15\%), Behavior (15\%), and Centrality (10\%). All formulas are explicitly defined, enabling complete reproducibility and independent verification.}\label{fig:election_mechanism}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\textwidth]{graph_consensus_voting.png}
+\caption{Trust-weighted consensus voting example showing three candidates competing for cluster head election. Vehicle v75 achieves 55.2\% vote weight (crossing the 51\% majority threshold shown by red dashed line) and is elected. The composite scores are displayed on the right, with v75 having the highest score (0.753) based on all five metrics.}\label{fig:consensus_voting}
 \end{figure}
 
 \subsection{Election Efficiency and Performance}\label{subsec5_3}
@@ -631,7 +625,8 @@ The framework demonstrates practical scalability for real-world deployment in de
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.9\textwidth]{graph9_5metric_comparison.png}
-\caption{Comprehensive comparison of the five metrics (Trust, Resource, Stability, Behavior, Centrality) across different node types: benign high-performers, average nodes, and detected malicious nodes. The metric profiles clearly differentiate trustworthy from untrustworthy nodes.}\label{fig:5metric_comparison}
+\caption{Five-metric profile comparison across different node categories in the simulation. The radar/bar chart shows how each of the five metrics (Trust, Resource, Stability, Behavior, Centrality) varies between: (a) benign high-performing nodes with excellent scores across all dimensions, (b) average benign nodes with moderate performance, and (c) detected malicious nodes with characteristically low trust and behavior scores. This visualization demonstrates how the multi-metric approach enables clear differentiation between trustworthy and untrustworthy nodes, with malicious nodes exhibiting distinct metric signatures that facilitate detection.}
+\label{fig:5metric_comparison}
 \end{figure}
 
 \begin{figure}[h]
@@ -641,9 +636,14 @@ The framework demonstrates practical scalability for real-world deployment in de
 \end{figure}
 
 \subsection{Stability (Total Re-Elections)}\label{subsec5_6}
-(Your text here... This is where you will put your graph for Scenario 3.)
-
 Stability was tested in Scenario 3 (Leader Failure). We compared our full "Combined Model" (with the HA Co-Leader) against a baseline model that triggers a full re-election on any leader failure.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\textwidth]{graph_re_elections.png}
+\caption{Re-election frequency comparison between baseline and our HA co-leader model. Baseline model requires 523 full re-elections for all leader changes. Our model with co-leader succession mechanism reduces full re-elections to only 183 (65\% reduction), with 340 leader changes handled via instant co-leader promotion (green bar). This demonstrates the HA mechanism's ability to maintain network stability while avoiding costly full elections during transient failures.}
+\label{fig:re_elections}
+\end{figure}
 
 As shown in Fig. \ref{fig:re_elections}, the baseline model triggered a cascade of costly re-elections as leaders naturally moved out of range. In contrast, our "Combined Model" triggered significantly fewer full re-elections. The HA co-leader mechanism provided instant, non-disruptive failover in the majority of test cases, proving its superior network stability and efficiency.
 
@@ -702,9 +702,6 @@ The principles demonstrated in this work extend beyond VANETs to the broader eco
 \textbf{Smart City Integration:} As cities deploy V2I (vehicle-to-infrastructure) networks, transparent trust becomes a bridge between mobile (vehicles) and fixed (traffic lights, road sensors) entities. The five metrics can be adapted to assess infrastructure reliability.
 
 \textbf{Regulatory Compliance:} Emerging regulations (e.g., EU's proposed AI Act, NHTSA guidelines) increasingly require explainability in safety-critical systems. Our transparency-first design proactively addresses these requirements, potentially accelerating real-world deployment timelines.
-
-\section{Conclusion}\label{sec7}
-In this paper, we proposed a novel, high-availability (HA) hybrid trust framework for cluster-based VANETs. Our model is designed to be both secure and highly stable, addressing key gaps in existing trust management solutions. We have demonstrated that by synthesizing a proactive Proof of Authority (PoA) detection layer with a reactive, benchmarked historical analysis \cite{c1}, our framework can successfully defend against both active attackers and passive "sleeper agents."
 
 \section{Conclusion}\label{sec7}
 This paper presents a comprehensive solution to two critical challenges in VANET cluster head election: security against sophisticated attacks and transparency for safety-critical deployment. Our transparent five-metric composite scoring system (Trust 40\%, Resource 20\%, Stability 15\%, Behavior 15\%, Centrality 10\%) advances beyond existing black-box approaches by making every calculation, formula, and weight explicit and verifiable.
