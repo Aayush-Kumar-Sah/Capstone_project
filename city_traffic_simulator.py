@@ -322,7 +322,13 @@ class CityVANETSimulator:
             # Vehicle types with different behaviors
             vehicle_type = random.choice(['car', 'car', 'car', 'truck', 'emergency'])
             is_emergency = (vehicle_type == 'emergency')
-            is_malicious = (i % 8 == 0) and not is_emergency  # ~12% malicious
+            
+            # SLEEPER AGENTS: 2 specific nodes that act normal initially, then become malicious
+            # v5 and v15 will be sleeper agents
+            is_sleeper = (i == 5 or i == 15) and not is_emergency
+            
+            # Regular malicious nodes (excluding sleeper agents)
+            is_malicious = (i % 8 == 0) and not is_emergency and not is_sleeper  # ~12% malicious
             
             vehicle_id = f'v{i}'
             self.app.add_vehicle(
@@ -338,6 +344,7 @@ class CityVANETSimulator:
                 'type': vehicle_type,
                 'is_emergency': is_emergency,
                 'is_malicious': is_malicious,
+                'is_sleeper': is_sleeper,  # New: track sleeper agents
                 'current_road': road,  # Track current road
                 'target_road': None,
                 'waiting_at_light': False,
@@ -351,7 +358,16 @@ class CityVANETSimulator:
             node.vehicle_type = vehicle_type
             node.lane_offset = 0.0  # Lateral position offset from road center
             
-            if is_malicious:
+            if is_sleeper:
+                # SLEEPER AGENTS: Start with HIGH trust to avoid detection
+                node.is_sleeper_agent = True
+                node.sleeper_activation_time = random.uniform(20, 40)  # Activate after 20-40 seconds
+                node.sleeper_activated = False
+                node.trust_score = 0.85  # High initial trust to pass as legitimate
+                node.message_count = random.randint(20, 40)  # Normal message count
+                node.erratic_behavior_count = 0
+                print(f"   🕵️  SLEEPER AGENT {vehicle_id} configured: activation at t={node.sleeper_activation_time:.1f}s")
+            elif is_malicious:
                 node.is_malicious = True
                 node.trust_score = 0.2
                 node.message_count = 150  # High message spam (suspicious)
@@ -370,6 +386,7 @@ class CityVANETSimulator:
                 'type': vc['type'],
                 'is_emergency': vc['is_emergency'],
                 'is_malicious': vc['is_malicious'],
+                'is_sleeper': vc.get('is_sleeper', False),  # Add sleeper flag
                 'current_road': vc['current_road'],  # Keep for simulation
                 'target_road': vc['target_road'],
                 'waiting_at_light': vc['waiting_at_light'],
@@ -1066,8 +1083,33 @@ class CityVANETSimulator:
             if random.random() < 0.02 and not config['is_emergency']:
                 node.speed = max(10, min(40, node.speed + random.uniform(-3, 3)))
             
+            # SLEEPER AGENT ACTIVATION: Behave normally initially, then turn malicious
+            if config.get('is_sleeper', False) and hasattr(node, 'is_sleeper_agent'):
+                if not node.sleeper_activated and current_time >= node.sleeper_activation_time:
+                    # ACTIVATE SLEEPER AGENT!
+                    node.sleeper_activated = True
+                    node.is_malicious = True
+                    config['is_malicious'] = True
+                    
+                    # Sudden behavioral change
+                    node.trust_score = 0.15  # Trust plummets
+                    node.erratic_behavior_count = 0
+                    
+                    print(f"\n   🚨 SLEEPER AGENT ACTIVATED: {vehicle_id} at t={current_time:.1f}s")
+                    print(f"      Previous trust: 0.85 → Current trust: {node.trust_score:.2f}")
+                    print(f"      Status: NOW EXHIBITING MALICIOUS BEHAVIOR\n")
+                
+                # If activated, exhibit malicious behavior
+                if node.sleeper_activated and random.random() < 0.15:
+                    # More aggressive malicious behavior than regular attackers
+                    node.speed = min(90, node.speed + random.uniform(15, 35))
+                    if hasattr(node, 'erratic_behavior_count'):
+                        node.erratic_behavior_count += 1
+                    # Rapid trust degradation
+                    node.trust_score = max(0.05, node.trust_score * 0.90)
+            
             # Malicious vehicles exhibit erratic behavior
-            if config['is_malicious'] and random.random() < 0.1:
+            elif config['is_malicious'] and random.random() < 0.1:
                 # Erratic speed changes
                 node.speed = min(85, node.speed + random.uniform(10, 30))
                 if hasattr(node, 'erratic_behavior_count'):
@@ -1204,7 +1246,19 @@ class CityVANETSimulator:
         current_time = 0.0
         frame_count = 0
         
-        print(f"Running city simulation for {self.duration} seconds...")
+        # Count vehicle types for summary
+        malicious_count = sum(1 for c in self.vehicle_configs.values() if c['is_malicious'])
+        sleeper_count = sum(1 for c in self.vehicle_configs.values() if c.get('is_sleeper', False))
+        emergency_count = sum(1 for c in self.vehicle_configs.values() if c['is_emergency'])
+        
+        print(f"\n🚗 VEHICLE COMPOSITION:")
+        print(f"   Total: {self.num_vehicles} vehicles")
+        print(f"   • Regular vehicles: {self.num_vehicles - malicious_count - sleeper_count - emergency_count}")
+        print(f"   • Active malicious: {malicious_count - sleeper_count} (~{((malicious_count-sleeper_count)/self.num_vehicles*100):.1f}%)")
+        print(f"   • 🕵️  SLEEPER AGENTS: {sleeper_count} (will activate after 20-40s)")
+        print(f"   • Emergency vehicles: {emergency_count}")
+        
+        print(f"\nRunning city simulation for {self.duration} seconds...")
         print(f"🗳️  Leader failure detection enabled (co-leader succession)")
         print("\n" + "="*70)
         print("🔬 THREE IMPROVEMENTS ACTIVE:")
@@ -1370,7 +1424,13 @@ class CityVANETSimulator:
     def _check_leader_failures(self, current_time: float):
         """Check for leader failures and handle co-leader succession or trigger re-election"""
         for cluster_id, cluster in list(self.app.clustering_engine.clusters.items()):
+            # CRITICAL FIX: Check if cluster has NO head_id at all
             if not cluster.head_id:
+                # Cluster exists but has no leader - trigger immediate election
+                if len(cluster.member_ids) >= 2:
+                    if current_time % 30 < 0.5:
+                        print(f"   🚨  {cluster_id} has NO LEADER - triggering emergency election")
+                    self._run_cluster_election(cluster_id, cluster, current_time)
                 continue
             
             # Initialize co-leader if not exists
@@ -1628,7 +1688,7 @@ class CityVANETSimulator:
         if not winner:
             return
         
-        # STEP 4: Update cluster leadership
+        # STEP 4: Update cluster leadership with FORCED FLAG SYNC
         old_leader = cluster.head_id
         cluster.head_id = winner
         
@@ -1640,8 +1700,10 @@ class CityVANETSimulator:
         if winner in cluster.member_ids:
             cluster.member_ids.remove(winner)
         
-        # Update node status
-        self.app.vehicle_nodes[winner].is_cluster_head = True
+        # Update node status - CRITICAL: Set both flags
+        winner_node = self.app.vehicle_nodes[winner]
+        winner_node.is_cluster_head = True
+        winner_node.cluster_id = cluster_id  # Ensure cluster_id matches
         
         # Elect co-leader
         self._elect_co_leader(cluster, current_time)
