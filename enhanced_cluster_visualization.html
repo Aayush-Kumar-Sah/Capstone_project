@@ -369,23 +369,45 @@
             // Count special nodes
             let leaderCount = 0, coLeaderCount = 0, relayCount = 0, boundaryCount = 0;
             
-            // Draw connections from leader to members
+            // Draw connections from leader to members (FIXED: strict cluster validation)
             frame.vehicles.forEach(vehicle => {
-                if (vehicle.role === 'leader' && vehicle.cluster_id) {
+                if (vehicle.role === 'leader' && vehicle.cluster_id && vehicle.cluster_id !== '') {
                     const leaderX = vehicle.x;
                     const leaderY = vehicle.y;
+                    const leaderClusterId = String(vehicle.cluster_id).trim(); // Ensure string and trim
                     
-                    // Draw lines to all cluster members
+                    // Draw lines only to nearby cluster members (within communication range ~250 pixels)
+                    const MAX_DISPLAY_DISTANCE = 300; // Only show connections within this range
+                    
                     frame.vehicles.forEach(other => {
-                        if (other.cluster_id === vehicle.cluster_id && other.id !== vehicle.id) {
-                            ctx.strokeStyle = getClusterColor(vehicle.cluster_id) + '40';
-                            ctx.lineWidth = 1;
-                            ctx.setLineDash([5, 3]);
-                            ctx.beginPath();
-                            ctx.moveTo(leaderX, leaderY);
-                            ctx.lineTo(other.x, other.y);
-                            ctx.stroke();
-                            ctx.setLineDash([]);
+                        // STRICT cluster matching with validation
+                        const otherClusterId = other.cluster_id ? String(other.cluster_id).trim() : '';
+                        
+                        if (otherClusterId !== '' &&                    // Must have valid cluster
+                            otherClusterId === leaderClusterId &&      // Must match leader's cluster exactly
+                            other.id !== vehicle.id &&                  // Not self
+                            other.role !== 'leader') {                  // Not another leader
+                            
+                            // Calculate distance
+                            const dx = other.x - leaderX;
+                            const dy = other.y - leaderY;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            
+                            // Only draw line if within display range
+                            if (distance <= MAX_DISPLAY_DISTANCE) {
+                                // Fade line based on distance (closer = more opaque)
+                                const opacity = Math.max(0.1, 1 - (distance / MAX_DISPLAY_DISTANCE));
+                                const opacityHex = Math.round(opacity * 100).toString(16).padStart(2, '0');
+                                
+                                ctx.strokeStyle = getClusterColor(vehicle.cluster_id) + opacityHex;
+                                ctx.lineWidth = 0.8;
+                                ctx.setLineDash([4, 4]);
+                                ctx.beginPath();
+                                ctx.moveTo(leaderX, leaderY);
+                                ctx.lineTo(other.x, other.y);
+                                ctx.stroke();
+                                ctx.setLineDash([]);
+                            }
                         }
                     });
                 }
