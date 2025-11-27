@@ -243,8 +243,7 @@ FOR EACH authority:
     │ • Known malicious?     → +0.5        │
     │ • Speed > 75 mph?      → +0.2        │
     │ • Message spam >100?   → +0.2        │
-    │ • Erratic behavior?    → +0.3        │
-    │ • Failed verification? → +0.4        │
+    │ • Erratic behavior?    → +0.3        │        │
     │ • Sleeper detected?    → +0.6        │
     └──────────────────────────────────────┘
     ↓
