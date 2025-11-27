@@ -27,7 +27,6 @@ class ClusterHeadElectionMethod(Enum):
     LOWEST_MOBILITY = "lowest_mobility"
     WEIGHTED_COMPOSITE = "weighted_composite"
     CENTRAL_POSITION = "central_position"
-    TRUST_BASED = "trust_based"  # New trust-based election
 
 @dataclass
 class ClusterMetrics:
@@ -77,9 +76,8 @@ class ClusterEvent:
 class ClusterManager:
     """Advanced cluster management system for VANET"""
     
-    def __init__(self, clustering_engine: VehicleClustering, trust_evaluator=None):
+    def __init__(self, clustering_engine: VehicleClustering):
         self.clustering_engine = clustering_engine
-        self.trust_evaluator = trust_evaluator  # Optional trust evaluation engine
         self.cluster_metrics: Dict[str, ClusterMetrics] = {}
         self.cluster_states: Dict[str, ClusterState] = {}
         self.cluster_formation_times: Dict[str, float] = {}
@@ -87,7 +85,7 @@ class ClusterManager:
         self.logger = logging.getLogger(__name__)
         
         # Management parameters
-        self.head_election_method = ClusterHeadElectionMethod.TRUST_BASED if trust_evaluator else ClusterHeadElectionMethod.WEIGHTED_COMPOSITE
+        self.head_election_method = ClusterHeadElectionMethod.WEIGHTED_COMPOSITE
         self.stability_threshold = 0.7
         self.merge_threshold = 0.8
         self.split_threshold = 0.3
